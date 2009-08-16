@@ -14,5 +14,14 @@ elseif isinf(a)
   return
 end
 
-b = abs(a);
-w = a/b*(z+b)./(1+b*z);
+global handles;
+moebius = handles.shapelab.common.moebius;
+%b = abs(a);
+%H = [1 b; b 1];
+H = abs(a)/a*[1 -a; -conj(a) 1];
+H = [H(2,2) -H(1,2); -H(2,1) H(1,1)];
+w = moebius(z,H);
+%w = moebius(z, H*a/b);
+
+%b = abs(a);
+%w = a/b*(z+b)./(1+b*z);
