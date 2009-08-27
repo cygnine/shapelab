@@ -1,20 +1,40 @@
-function[w] = zipup_at_ic(z,c,varargin)
-% [w] = z_unzip_at_ic(z,c,{cut_bias=false,boundary=false})
+function[z] = zipup_at_ic(w,c,varargin)
+% [z] = zipup_at_ic(w,c,point_id=zeros(size(z)))
 %
 %     Implements the inverse of z_unzip_at_c. I.e., the function sqrt(z^2 -
-%     c^2). 
+%     c^2) for a real-valued c. As in z_unzip_at_ic, the optional input point_id
+%     determines how the map behaves. The possible values of point_id are:
+%
+%     0: The point is somewhere in \mathbb{H}\backslash{\mathbb{R}}. Actiona of
+%        the map is normal.
+%     1: The point is on \mathbb{R}. 
+%     2: The point is on the \mathbb{R} between [-c,c]. Although this is an
+%     easily-testable case of 1, you may want to force this behavior in the case
+%     of machine-epsilon crap.
+%
+%     The number of possibilities are reduced compared to z_unzip_at_ic because
+%     there are really only two regions where care must be taken.
 
 global handles;
-tol = 1e-6;
 csqrt = handles.shapelab.common.positive_angle_square_root;
-opt = handles.common.InputSchema({'boundary'}, {false}, [], varargin{:});
+opt = handles.common.InputSchema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 
-if opt.boundary
-  flags = abs(imag(z))<=tol;
-  z(flags) = real(z(flags));
-end
+interior = opt.point_id==0;
+rline = opt.point_id==1;
+gamma = opt.point_id==2;
 
-w = csqrt(z.^2 - c^2,'cut_bias', true);
+% The 'interior' case
+z(interior) = csqrt(w(interior).^2 - c^2);
 
-rflags = abs(imag(z))<tol & real(z)<(-c+tol);
-w(rflags) = -w(rflags);
+% The problem cases
+z1 = real(w(rline));
+z2 = real(w(gamma));
+% Let's do some massaging. 'gamma' means on the pre-image of (0,0) -- (0,c)
+z1gamma = abs(z1)<=c; % cases where gamma behavior is not explicit
+z1(z1gamma) = i*sqrt(c^2 - z1(z1gamma).^2);
+z1(~z1gamma) = sign(z1(~z1gamma)).*sqrt(z1(~z1gamma).^2 - c^2);
+z(rline) = z1;
+
+% If things are on gamma, straightforward
+z2 = i*sqrt(c^2 - z2.^2);
+z(gamma) = z2;
