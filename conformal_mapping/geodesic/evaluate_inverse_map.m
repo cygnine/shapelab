@@ -74,7 +74,7 @@ if any(opt.point_id==0)
   % Now loop through a_array
   N = length(mapdata.a_array)+1;
 
-  ifa_opt.temp = zeros(size(w0));
+  ifa_opt.point_id = zeros(size(w0));
   ifa_opt.cut_magnitude = mapdata.zip_magnitude;
   for q = (N-2):-1:1
     w0 = ifa(w0, mapdata.a_array(q), ifa_opt);
@@ -86,11 +86,82 @@ if any(opt.point_id==0)
 end
 
 if any(opt.point_id==1)
-  error('Not coded yet');
+  if not(all(abs(abs(w1)-1)<1e-10))
+    error('It doesn''t look like you gave me points on the unit circle....');
+  end
+  % map unit circle to R:
+  m = [-1, i;...
+        1, i];
+  w1 = real(moebius_inv(w1,m));
+
+  % apply inv(m_in) on interior
+  w1 = moebius_inv(w1, mapdata.m_in);
+
+  w1 = w1*-sign(mapdata.winding_number);
+  w1(w1<0) = i*sqrt(abs(w1(w1<0)));
+  w1(w1>=0) = -sqrt(w1(w1>=0));
+
+  % Invert the terminal map (moebius)
+  m = [1, 0;...
+       -mapdata.a_array(end), 1];
+  w1 = moebius_inv(w1,m);
+
+  ifa_opt.point_id = ones(size(w1));
+  ifa_opt.cut_magnitude = mapdata.zip_magnitude;
+
+  % Here's the fun part: right now everything's on the real line. The second it
+  % gets zipped up from the real line, we have to tell ifa to treat it as an
+  % interior point instead of a boundary point.
+
+  N = length(mapdata.a_array)+1;
+  for q = (N-2):-1:1
+    w1 = ifa(w1, mapdata.a_array(q), ifa_opt);
+    winterior = abs(imag(w1))>0;
+    ifa_opt.point_id(winterior) = 0;
+  end
+
+  w1 = moebius_inv((w1/i).^2, mapdata.m_initial);
+  z(opt.point_id==1) = w1;
 end
 
+% If I cared more, I could do this without copy+paste from above
 if any(opt.point_id==2)
-  error('Not coded yet');
+  if not(all(abs(abs(w2)-1)<1e-10))
+    error('It doesn''t look like you gave me points on the unit circle....');
+  end
+  % map unit circle to R:
+  m = [-1, i;...
+        1, i];
+  w2 = real(moebius_inv(w2,m));
+
+  % apply inv(m_out) on interior
+  w2 = moebius_inv(w2, mapdata.m_out);
+
+  w2 = w2*-sign(mapdata.winding_number);
+  w2(w2<0) = i*sqrt(abs(w2(w2<0)));
+  w2(w2>=0) = sqrt(w2(w2>=0));
+
+  % Invert the terminal map (moebius)
+  m = [1, 0;...
+       -mapdata.a_array(end), 1];
+  w2 = moebius_inv(w2,m);
+
+  ifa_opt.point_id = ones(size(w2));
+  ifa_opt.cut_magnitude = mapdata.zip_magnitude;
+
+  % Here's the fun part: right now everything's on the real line. The second it
+  % gets zipped up from the real line, we have to tell ifa to treat it as an
+  % interior point instead of a boundary point.
+
+  N = length(mapdata.a_array)+1;
+  for q = (N-2):-1:1
+    w2 = ifa(w2, mapdata.a_array(q), ifa_opt);
+    winterior = abs(imag(w2))>0;
+    ifa_opt.point_id(winterior) = 0;
+  end
+
+  w2 = moebius_inv((w2/i).^2, mapdata.m_initial);
+  z(opt.point_id==2) = w2;
 end
 
 %% Un-normalize

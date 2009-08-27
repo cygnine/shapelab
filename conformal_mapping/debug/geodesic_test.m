@@ -27,7 +27,13 @@ for q = 1:M
   wint((q-1)*length(z)+1:q*length(z)) = exp(i*theta).*(q-1)/M;
 end
 
+wout = zeros([N*M 1]);
+for q = 1:M
+  wout((q-1)*length(z)+1:q*length(z)) = exp(i*theta).*(q+M)/M;
+end
+
 wint_image = gd.evaluate_inverse_map(wint,mapdata);
+wout_image = gd.evaluate_inverse_map(wout,mapdata);
 
 % testing:
 %test1 = gd.evaluate_map(z,mapin);
@@ -75,11 +81,11 @@ wint = i*sqrt(moebius(wint, m));
 
 unzipped_in = [Inf;0]; % original z_1, z_2
 unzipped_out = [Inf;0];
-figure; 
-p1 = plot(zeta_n, 'b.'); hold on;
-p2 = plot(wint, 'g.');
-p3 = plot(unzipped_in, 'r.');
-p4 = plot(unzipped_out, 'k.');
+%figure; 
+%p1 = plot(zeta_n, 'b.'); hold on;
+%p2 = plot(wint, 'g.');
+%p3 = plot(unzipped_in, 'r.');
+%p4 = plot(unzipped_out, 'k.');
 
 % Ok, now zip down each point, keeping track of where everything goes
 for q = 1:(N-2);
@@ -95,6 +101,9 @@ for q = 1:(N-2);
   wint = fa(wint,a_array(q),'point_id',zeros(size(wint)),'cut_magnitude', 1/2);
   %wint = fa(wint,a_array(q),'point_id',zeros(size(wint)));
   temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
+
+  unzipped_in_test1 = unzipped_in;
+
   [unzipped_in,blah] = fa(unzipped_in,a_array(q),'point_id',temp,'cut_magnitude',1/2); 
   %[unzipped_in,blah] = fa(unzipped_in,a_array(q),'point_id',temp);
   [blah,unzipped_out] = fa(unzipped_out,a_array(q),'point_id',temp,'cut_magnitude',1/2);
@@ -104,12 +113,14 @@ for q = 1:(N-2);
   unzipped_in(end+1) = 0;
   unzipped_out(end+1) = 0;
 
-  set(p1, 'xdata', real(zeta_n), 'ydata', imag(zeta_n));
-  set(p2, 'xdata', real(wint), 'ydata', imag(wint));
-  set(p3, 'xdata', real(unzipped_in), 'ydata', imag(unzipped_in));
-  set(p4, 'xdata', real(unzipped_out), 'ydata', imag(unzipped_out));
-  drawnow;
+  %set(p1, 'xdata', real(zeta_n), 'ydata', imag(zeta_n));
+  %set(p2, 'xdata', real(wint), 'ydata', imag(wint));
+  %set(p3, 'xdata', real(unzipped_in), 'ydata', imag(unzipped_in));
+  %set(p4, 'xdata', real(unzipped_out), 'ydata', imag(unzipped_out));
+  %drawnow;
 end
+
+unzipped_in_test2 = unzipped_in;
 
 % Finally, the terminal map. By now, only 3 points are left: infinity +
 % normalization point + z(1)
@@ -162,3 +173,9 @@ unzipped_out = moebius(unzipped_out, m);
 
 tin = unwrap(angle(unzipped_in));
 tout = unwrap(angle(unzipped_out));
+
+wincircle_image = gd.evaluate_inverse_map(unzipped_in, mapdata,...
+    'point_id', ones(size(unzipped_in)));
+
+woutcircle_image = gd.evaluate_inverse_map(unzipped_out, mapdata,...
+    'point_id', 2*ones(size(unzipped_out)));
