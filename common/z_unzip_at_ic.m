@@ -47,5 +47,5 @@ v(interior) = csqrt(z(interior).^2 + c^2);
 v(boundary) = sign(z(boundary)).*sqrt(z(boundary).^2 + c^2);
 w = v;
 
-v(gamma) = -sqrt(c^2 - imag(z(gamma).^2));
+v(gamma) = -sqrt(c^2 - imag(z(gamma)).^2);
 w(gamma) = -v(gamma);

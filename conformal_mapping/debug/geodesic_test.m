@@ -174,8 +174,15 @@ unzipped_out = moebius(unzipped_out, m);
 tin = unwrap(angle(unzipped_in));
 tout = unwrap(angle(unzipped_out));
 
-wincircle_image = gd.evaluate_inverse_map(unzipped_in, mapdata,...
-    'point_id', ones(size(unzipped_in)));
+%wincircle_image = gd.evaluate_inverse_map(unzipped_in, mapdata,...
+%    'point_id', ones(size(unzipped_in)));
 
-woutcircle_image = gd.evaluate_inverse_map(unzipped_out, mapdata,...
-    'point_id', 2*ones(size(unzipped_out)));
+%woutcircle_image = gd.evaluate_inverse_map(unzipped_out, mapdata,...
+%    'point_id', 2*ones(size(unzipped_out)));
+
+unzipped_in_fine = exp(i*thetaf).';
+zfine = gd.evaluate_inverse_map(unzipped_in_fine, mapdata, 'point_id', ...
+  ones(size(thetaf.')));
+
+unzipped_out_fine = gd.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
+  ones(size(unzipped_in_fine)));

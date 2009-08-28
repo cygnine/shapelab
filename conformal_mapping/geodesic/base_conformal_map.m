@@ -6,6 +6,10 @@ function[v,w] = base_conformal_map(z,a,varargin)
 %     technique. The complex, scalar parameter is a, and the (array) complex
 %     input is z. 
 %
+%     The two outputs v and w refer to whether the points that lie on gamma (see
+%     below) are unzipped to the negative x-axis or positive x-axis,
+%     respectively.
+%
 %     The optional input point_id has the same size as z and each entry takes
 %     three possible values:
 %     0: The point is some point in \mathbb{H}\backslash\{\gamma}, where \gamma

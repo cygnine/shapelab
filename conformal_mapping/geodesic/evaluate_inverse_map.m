@@ -1,12 +1,6 @@
 function[z]= evaluate_inverse_map(w,mapdata,varargin)
 % [z]= evaluate_inverse_map(w,mapdata,{point_id=zeros(size(w))})
 %
-%     Input mapdata contains:
-%            a_array
-%            z_initial
-%            zeta_n
-%            normalization
-%
 %     Evaluates the inverse of the zipper-type conformal map defined by mapdata.
 %     The optional input 'point_id' should be specified as follows:
 %
@@ -20,7 +14,7 @@ function[z]= evaluate_inverse_map(w,mapdata,varargin)
 %     that you want to map onto the shape.
 %
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
-%     conformal mapping", 2006.
+%          conformal mapping", 2006.
 
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {zeros(size(w))}, [], varargin{:});
@@ -28,10 +22,6 @@ ifa = handles.shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
 moebius = handles.shapelab.common.moebius;
 moebius_inv = handles.shapelab.common.moebius_inverse;
 csqrt = handles.shapelab.common.positive_angle_square_root;
-
-%[z_initial, a_array, a_cut_bias, normalization_persistence, zeta_n, normalization] = ...
-%  deal(mapdata.z_initial, mapdata.a_array, mapdata.a_cut_bias, ...
-%    mapdata.normalization_persistence, mapdata.zeta_n, mapdata.normalization);
 
 % We must deal with three cases:
 w0 = w(opt.point_id==0);
@@ -85,6 +75,7 @@ if any(opt.point_id==0)
   z(opt.point_id==0) = w0;
 end
 
+% If we're on the unit circle interior
 if any(opt.point_id==1)
   if not(all(abs(abs(w1)-1)<1e-10))
     error('It doesn''t look like you gave me points on the unit circle....');
@@ -98,8 +89,9 @@ if any(opt.point_id==1)
   w1 = moebius_inv(w1, mapdata.m_in);
 
   w1 = w1*-sign(mapdata.winding_number);
-  w1(w1<0) = i*sqrt(abs(w1(w1<0)));
-  w1(w1>=0) = -sqrt(w1(w1>=0));
+  temp = w1;
+  w1(temp<0) = i*sqrt(abs(temp(temp<0)));
+  w1(temp>=0) = -sqrt(temp(temp>=0));
 
   % Invert the terminal map (moebius)
   m = [1, 0;...
@@ -107,6 +99,7 @@ if any(opt.point_id==1)
   w1 = moebius_inv(w1,m);
 
   ifa_opt.point_id = ones(size(w1));
+  ifa_opt.point_id(abs(imag(w1))>1e-10) = 0;
   ifa_opt.cut_magnitude = mapdata.zip_magnitude;
 
   % Here's the fun part: right now everything's on the real line. The second it
@@ -124,7 +117,9 @@ if any(opt.point_id==1)
   z(opt.point_id==1) = w1;
 end
 
-% If I cared more, I could do this without copy+paste from above
+% If I cared more, I could do this without copy+paste from above -- only two
+% lines are different
+% If we're on the unit circle exterior
 if any(opt.point_id==2)
   if not(all(abs(abs(w2)-1)<1e-10))
     error('It doesn''t look like you gave me points on the unit circle....');
@@ -147,6 +142,7 @@ if any(opt.point_id==2)
   w2 = moebius_inv(w2,m);
 
   ifa_opt.point_id = ones(size(w2));
+  ifa_opt.point_id(abs(imag(w2))>1e-10) = 0;
   ifa_opt.cut_magnitude = mapdata.zip_magnitude;
 
   % Here's the fun part: right now everything's on the real line. The second it
@@ -163,28 +159,3 @@ if any(opt.point_id==2)
   w2 = moebius_inv((w2/i).^2, mapdata.m_initial);
   z(opt.point_id==2) = w2;
 end
-
-%% Un-normalize
-%w = dab(z, normalization(2), normalization(1));
-%
-%% Map from unit circle to half-plane
-%w = moebius(w, [i -i; -1 -1]);
-%if opt.boundary
-%  w = real(w);
-%end
-%
-%% Invert terminal map
-%w = csqrt(mapdata.terminal_sign*w,'cut_bias', false);
-%w = moebius(w, [1 0; 1/zeta_n 1]);
-%
-%% Invert sequential maps
-%for q = length(a_array):-1:1
-%  %if q<=length(a_array) && normalization_persistence(q)~=0
-%  %  w = w/normalization_persistence(q);
-%  %end
-%  w = ifa(w,a_array(q));
-%end
-%
-%% Invert initial map
-%w = (w/i).^2;
-%w = moebius(w, [-z_initial(1) z_initial(2); -1 1]);
