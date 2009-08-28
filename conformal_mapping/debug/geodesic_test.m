@@ -4,10 +4,10 @@ gd = handles.shapelab.conformal_mapping.geodesic;
 N = 100;
 theta = linspace(-pi,pi,N+1); 
 theta = theta(1:N);
-z = (1+0.45*cos(theta*4)).*exp(i*theta);
+z = (1+0.95*cos(theta*4)).*exp(i*theta);
 
 thetaf = linspace(-pi,pi,10*N);
-zf = (1+0.45*cos(thetaf*4)).*exp(i*thetaf);
+zf = (1+0.95*cos(thetaf*4)).*exp(i*thetaf);
 M = 50;
 zint = zeros([N*M,1]);
 for q = 1:M
@@ -19,8 +19,10 @@ for q = 1:M
   zout((q-1)*length(z)+1:q*length(z)) = z.*((q+M+1)/M); 
 end
 
+zip_magnitude = 0.85;
+
 mapdata = gd.compute_map_coordinates(z,'z_in', 0, 'w_in', 0, ...
-      'zip_magnitude', 0.5);
+      'zip_magnitude', zip_magnitude);
 
 wint = zeros([N*M 1]);
 for q = 1:M
@@ -96,17 +98,17 @@ for q = 1:(N-2);
   % interior points + infinity + normalization point + original z(1)
   temp = zeros(size(zeta_n(2:end)));
   temp(end) = 2;
-  zeta_n = fa(zeta_n(2:end),a_array(q),'point_id',temp,'cut_magnitude', 1/2);
+  zeta_n = fa(zeta_n(2:end),a_array(q),'point_id',temp,'cut_magnitude', zip_magnitude);
   %zeta_n = fa(zeta_n(2:end),a_array(q),'point_id',temp);
-  wint = fa(wint,a_array(q),'point_id',zeros(size(wint)),'cut_magnitude', 1/2);
+  wint = fa(wint,a_array(q),'point_id',zeros(size(wint)),'cut_magnitude', zip_magnitude);
   %wint = fa(wint,a_array(q),'point_id',zeros(size(wint)));
   temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
 
   unzipped_in_test1 = unzipped_in;
 
-  [unzipped_in,blah] = fa(unzipped_in,a_array(q),'point_id',temp,'cut_magnitude',1/2); 
+  [unzipped_in,blah] = fa(unzipped_in,a_array(q),'point_id',temp,'cut_magnitude',zip_magnitude); 
   %[unzipped_in,blah] = fa(unzipped_in,a_array(q),'point_id',temp);
-  [blah,unzipped_out] = fa(unzipped_out,a_array(q),'point_id',temp,'cut_magnitude',1/2);
+  [blah,unzipped_out] = fa(unzipped_out,a_array(q),'point_id',temp,'cut_magnitude',zip_magnitude);
   %[blah,unzipped_out] = fa(unzipped_out,a_array(q),'point_id',temp);
 
   % Now add 0 to the list of zipped_in/out points:
@@ -181,8 +183,10 @@ tout = unwrap(angle(unzipped_out));
 %    'point_id', 2*ones(size(unzipped_out)));
 
 unzipped_in_fine = exp(i*thetaf).';
-zfine = gd.evaluate_inverse_map(unzipped_in_fine, mapdata, 'point_id', ...
-  ones(size(thetaf.')));
 
-unzipped_out_fine = gd.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
+unzipped_in_fine_image = gd.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
   ones(size(unzipped_in_fine)));
+
+unzipped_out_fine = exp(i*thetaf).';
+unzipped_out_fine_image = gd.switch_zipper_side(unzipped_out_fine, mapdata, 'point_id',...
+  2*ones(size(unzipped_out_fine)));

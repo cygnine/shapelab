@@ -19,8 +19,18 @@ function[z] = switch_zipper_side(z,mapdata,varargin)
 
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {ones(size(z))}, [], varargin{:});
-ifa = handles.shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
-fa = handles.shapelab.conformal_mapping.geodesic.base_conformal_map;
+shapelab = handles.shapelab;
+
+switch lower(mapdata.type)
+case 'geodesic'
+  ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+  fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
+case 'slit'
+  error('not yet implemented');
+case 'zipper'
+  error('not yet implemented');
+end
+
 moebius = handles.shapelab.common.moebius;
 moebius_inv = handles.shapelab.common.moebius_inverse;
 csqrt = handles.shapelab.common.positive_angle_square_root;
@@ -86,7 +96,9 @@ end
 
 % Ok, now everything is zipped up. Time to unzipper it all. 
 unzip = false(size(z));
+unzip(ifa_opt.point_id==1) = true; % Some points are still on R
 ifa_input.point_id = ones(size(z));
+ifa_input.point_id(unzip) = 2;
 for q = 1:(N-2)
   % Add on points that need to be unzippered
   unzip(z_tooth_indicator_bins{q}) = true;

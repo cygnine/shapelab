@@ -1,6 +1,7 @@
 function[mapdata] = compute_map_coordinates(z_n,varargin)
 % [z_initial,a_array,zeta_n] = compute_map_coordinates(z_n,{z_in=false,w_in=false,
-%                 z_out=false, w_out=false, winding_number=1, zip_magnitude=0.85})
+%                 z_out=false, w_out=false, winding_number=1,
+%                 zip_magnitude=0.85, type='geodesic'})
 %
 %     The main workhorse routine for computing a conformal map from the points
 %     z_n to points on the unit circle. 
@@ -14,6 +15,7 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %            w_out
 %            vertices_in
 %            vertices_out
+%            type
 %
 %     The output mapdata contains all the necessary information for travelling
 %     back and forth on the conformal map defined by the shape's vertices z_n
@@ -40,18 +42,29 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %     The option zip_magnitude refers to how each 'base' map is normalized.
 %     Empirically, values O(1) produce stable results.
 %
+%     The `type' of mapping can be: 'geodesic', 'slit', or 'zipper'.
+%
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %          conformal mapping", 2006.
 
 global handles;
 % [z_initial,a_array,zeta_n] = compute_map_coordinates(z_n,{z_in=false,w_in=false,
 %                   z_out=false, w_out=false, winding_number=1, zip_magnitude=1})
-inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number', 'zip_magnitude'};
-defaults = {false, false, false, false, 1, 0.85};
+inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
+          'zip_magnitude','type'};
+defaults = {false, false, false, false, 1, 0.85, 'geodesic'};
 opt = handles.common.InputSchema(inputs,defaults,[],varargin{:});
-moebius = handles.shapelab.common.moebius;
-moebius_inv = handles.shapelab.common.moebius_inverse;
-fa = handles.shapelab.conformal_mapping.geodesic.base_conformal_map;
+shapelab = handles.shapelab;
+moebius = shapelab.common.moebius;
+moebius_inv = shapelab.common.moebius_inverse;
+switch lower(opt.type)
+case 'geodesic'
+  fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
+case 'slit'
+  error('not yet implemented');
+case 'zipper'
+  error('not yet implemented');
+end
 
 z_n = z_n(:);
 N = length(z_n);
@@ -96,14 +109,11 @@ for q = 1:(N-2)
   temp(end) = 2;
   fa_opt.point_id = temp;
   zeta_n = fa(zeta_n(2:end),a_array(q),fa_opt);
-  %zeta_n = fa(zeta_n(2:end),a_array(q),'point_id',temp);
 
   temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
   fa_opt.point_id = temp;
   [unzipped_in,garbage] = fa(unzipped_in,a_array(q),fa_opt);
-  %[unzipped_in,blah] = fa(unzipped_in,a_array(q),'point_id',temp);
   [garbage,unzipped_out] = fa(unzipped_out,a_array(q),fa_opt);
-  %[blah,unzipped_out] = fa(unzipped_out,a_array(q),'point_id',temp);
 
   % Now add 0 to the list of zipped_in/out points:
   unzipped_in(end+1) = 0;
@@ -180,6 +190,8 @@ unzipped_out = moebius(unzipped_out, m);
 % Classes, anyone?
 [mapdata.a_array, mapdata.zip_magnitude, mapdata.z_in, mapdata.w_in,...
  mapdata.z_out, mapdata.w_out, mapdata.vertices_in, mapdata.vertices_out,...
- mapdata.winding_number, mapdata.m_in, mapdata.m_out, mapdata.m_initial] = ...
+ mapdata.winding_number, mapdata.m_in, mapdata.m_out, mapdata.m_initial,...
+ mapdata.type] = ...
  deal(a_array, opt.zip_magnitude,opt.z_in, opt.w_in, opt.z_out, opt.w_out, ...
-      unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial);
+      unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial,...
+      opt.type);

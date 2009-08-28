@@ -18,7 +18,16 @@ function[z]= evaluate_inverse_map(w,mapdata,varargin)
 
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {zeros(size(w))}, [], varargin{:});
-ifa = handles.shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+shapelab = handles.shapelab;
+switch lower(mapdata.type)
+case 'geodesic'
+  ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+case 'slit'
+  error('not yet implemented');
+case 'zipper'
+  error('not yet implemented');
+end
+
 moebius = handles.shapelab.common.moebius;
 moebius_inv = handles.shapelab.common.moebius_inverse;
 csqrt = handles.shapelab.common.positive_angle_square_root;
@@ -129,7 +138,7 @@ if any(opt.point_id==2)
         1, i];
   w2 = real(moebius_inv(w2,m));
 
-  % apply inv(m_out) on interior
+  % apply inv(m_out) on exterior
   w2 = moebius_inv(w2, mapdata.m_out);
 
   w2 = w2*-sign(mapdata.winding_number);
