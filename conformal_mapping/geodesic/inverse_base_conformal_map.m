@@ -26,7 +26,7 @@ c = abs(a)^2/imag(a);
 opt = handles.common.InputSchema({'point_id','cut_magnitude'}, ...
       {zeros(size(z),'int8'), c}, [],varargin{:});
 moebius_inv = handles.shapelab.common.moebius_inverse;
-zipup_at_c = handles.shapelab.common.zipup_at_ic;
+zipup_at_c = handles.shapelab.common.symmetric_zipup_to_ic;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 

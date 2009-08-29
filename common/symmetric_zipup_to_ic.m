@@ -2,7 +2,7 @@ function[z] = zipup_at_ic(w,c,varargin)
 % [z] = zipup_at_ic(w,c,point_id=zeros(size(z)))
 %
 %     Implements the inverse of z_unzip_at_c. I.e., the function sqrt(z^2 -
-%     c^2) for a real-valued c. As in z_unzip_at_ic, the optional input point_id
+%     c^2) for a real-valued c. As in symmetric_unzip_from_ic, the optional input point_id
 %     determines how the map behaves. The possible values of point_id are:
 %
 %     0: The point is somewhere in \mathbb{H}\backslash{\mathbb{R}}. Actiona of
@@ -12,7 +12,7 @@ function[z] = zipup_at_ic(w,c,varargin)
 %     easily-testable case of 1, you may want to force this behavior in the case
 %     of machine-epsilon crap.
 %
-%     The number of possibilities are reduced compared to z_unzip_at_ic because
+%     The number of possibilities are reduced compared to symmetric_unzip_from_ic because
 %     there are really only two regions where care must be taken.
 
 global handles;
