@@ -48,8 +48,6 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %          conformal mapping", 2006.
 
 global handles;
-% [z_initial,a_array,zeta_n] = compute_map_coordinates(z_n,{z_in=false,w_in=false,
-%                   z_out=false, w_out=false, winding_number=1, zip_magnitude=1})
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
           'zip_magnitude','type'};
 defaults = {false, false, false, false, 1, 0.85, 'geodesic'};

@@ -1,5 +1,5 @@
 global handles;
-gd = handles.shapelab.conformal_mapping.geodesic;
+gd = handles.shapelab.conformal_mapping;
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 
