@@ -51,34 +51,44 @@ if any(interior)
        (1-2*p)*p*q./(3*z.^2);
 
   % Radial separation between Newton behaviors
-  r_critical = 100;
+  %r_critical = 100;
 
   % For points "close" to 0, we'll use regular unscaled Newton
-  f = @(x) (x-p).^p.*(x+q).^q;
-  df = @(x) p*((x+q)./(x-p)).^q + q*((x-p)./(x+q)).^p;
-  flags = (abs(z)<=r_critical) & interior;
-  if any(flags)
-    [v(flags),flag] = newton(v0(flags),f,df,'F',z(flags)/C);
-    if flag==1
-      error('Newton''s methods didn''t converge');
-    end
-    w(flags) = v(flags);
-  end
+  %f = @(x) (x-p).^p.*(x+q).^q;
+  %df = @(x) p*((x+q)./(x-p)).^q + q*((x-p)./(x+q)).^p;
+  %flags = (abs(z)<=r_critical) & interior;
+  %if any(flags)
+  %  [v(flags),flag] = newton(v0(flags),f,df,'F',z(flags)/C);
+  %  if flag==1
+  %    error('Newton''s methods didn''t converge');
+  %  end
+  %  w(flags) = v(flags);
+  %end
 
   % For points "far" from 0, we'll use the (z/w) method
   % Rewrite in (z/w) form: sketchy as hell
-  flags = (abs(z)>r_critical) & interior;
-  fnorm = max(z(flags));
+  %flags = (abs(z)>r_critical) & interior;
+  %fnorm = max(z(flags));
+  %f = @(x) (x-p./fnorm).^p.*(x+q./fnorm).^q;
+  %df = @(x) p*((x+q./fnorm)./(x-p./fnorm)).^q + q*((x-p./fnorm)./(x+q./fnorm)).^p;
+  %if any(flags)
+  %  [v(flags),flag] = newton(v0(flags)/fnorm,f,df,'F',z(flags)/(C*fnorm));
+  %  if flag==1
+  %    error('Newton''s methods didn''t converge');
+  %  end
+  %  v(flags) = fnorm*v(flags);
+  %  w(flags) = v(flags);
+  %end
+
+  % Normalize all interior points...no funny opening-up business that Marshall does
+  fnorm = z(interior)/C;
   f = @(x) (x-p./fnorm).^p.*(x+q./fnorm).^q;
   df = @(x) p*((x+q./fnorm)./(x-p./fnorm)).^q + q*((x-p./fnorm)./(x+q./fnorm)).^p;
-  if any(flags)
-    [v(flags),flag] = newton(v0(flags)/fnorm,f,df,'F',z(flags)/(C*fnorm));
-    if flag==1
-      error('Newton''s methods didn''t converge');
-    end
-    v(flags) = fnorm*v(flags);
-    w(flags) = v(flags);
+  [v(interior),flag] = newton(v0(interior)./(fnorm), f, df, 'F', ones(size(z(interior))),'fx_tol',0,'x_tol',0,'maxiter',10);
+  if any(abs(f(v(interior)) - 1)>1e-8)
+    error('Newton''s method didn''t converge');
   end
+  v(interior) = v(interior).*fnorm;
 end
 
 % If we're on gamma, then the solution on the real line satisfies (x-p)<0 and
