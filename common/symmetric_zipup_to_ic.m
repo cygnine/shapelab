@@ -1,11 +1,11 @@
-function[z] = zipup_at_ic(w,c,varargin)
-% [z] = zipup_at_ic(w,c,point_id=zeros(size(z)))
+function[z] = symmetric_zipup_to_ic(w,c,varargin)
+% [z] = symmetric_zipup_to_ic(w,c,point_id=zeros(size(z)))
 %
-%     Implements the inverse of z_unzip_at_c. I.e., the function sqrt(z^2 -
+%     Implements the inverse of symmetric_unzip_from_ic. I.e., the function sqrt(z^2 -
 %     c^2) for a real-valued c. As in symmetric_unzip_from_ic, the optional input point_id
 %     determines how the map behaves. The possible values of point_id are:
 %
-%     0: The point is somewhere in \mathbb{H}\backslash{\mathbb{R}}. Actiona of
+%     0: The point is somewhere in \mathbb{H}\backslash{\mathbb{R}}. Action of
 %        the map is normal.
 %     1: The point is on \mathbb{R}. 
 %     2: The point is on the \mathbb{R} between [-c,c]. Although this is an

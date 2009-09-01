@@ -26,7 +26,6 @@ function[v,w] = symmetric_unzip_from_ic(z,c,varargin)
 %     complex-number operation.
 
 global handles;
-%opt = handles.common.InputSchema({'cut_bias','boundary'}, {false,false}, [], varargin{:});
 opt = handles.common.InputSchema({'point_id'}, {zeros(size(z),'int8')}, [], varargin{:});
 csqrt = handles.shapelab.common.positive_angle_square_root;
 

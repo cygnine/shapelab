@@ -23,7 +23,7 @@ switch lower(mapdata.type)
 case 'geodesic'
   ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
 case 'slit'
-  error('not yet implemented');
+  ifa = shapelab.conformal_mapping.slit.inverse_base_conformal_map;
 case 'zipper'
   error('not yet implemented');
 end

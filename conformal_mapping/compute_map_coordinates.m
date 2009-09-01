@@ -59,9 +59,11 @@ switch lower(opt.type)
 case 'geodesic'
   fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
 case 'slit'
-  error('not yet implemented');
+  fa = shapelab.conformal_mapping.slit.base_conformal_map;
 case 'zipper'
   error('not yet implemented');
+otherwise
+  error(['Unrecognized algorithm specification ''' opt.type '''']);
 end
 
 z_n = z_n(:);
