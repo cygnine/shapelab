@@ -2,6 +2,7 @@ global handles;
 clover = handles.shapelab.test_shapes.polar_clover;
 plinspace = handles.shapelab.common.polar_linspace;
 gd = handles.shapelab.conformal_mapping.zipper;
+weld = handles.shapelab.welding;
 
 N = 100;
 opt.lobes = 4;
@@ -30,13 +31,13 @@ wint_image = gd.evaluate_inverse_map(wint,mapdata);
 wout_image = gd.evaluate_inverse_map(wout,mapdata);
 
 unzipped_in_fine = plinspace(1,10*N,'r0',1,'r1',1);
-unzipped_in_fine_image = gd.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
+unzipped_in_fine_image = weld.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
   ones(size(unzipped_in_fine)));
 unzipped_in_fine_shape = gd.evaluate_inverse_map(unzipped_in_fine, mapdata,...
           'point_id', ones(size(unzipped_in_fine)));
 
 unzipped_out_fine = plinspace(1,10*N,'r0',1,'r1',1);
-unzipped_out_fine_image = gd.switch_zipper_side(unzipped_out_fine, mapdata, 'point_id',...
+unzipped_out_fine_image = weld.switch_zipper_side(unzipped_out_fine, mapdata, 'point_id',...
   2*ones(size(unzipped_out_fine)));
 unzipped_out_fine_shape = gd.evaluate_inverse_map(unzipped_out_fine, mapdata,...
           'point_id', 2*ones(size(unzipped_out_fine)));

@@ -1,5 +1,6 @@
 global handles;
 gd = handles.shapelab.conformal_mapping.zipper;
+weld = handles.shapelab.welding;
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 
@@ -184,9 +185,9 @@ tout = unwrap(angle(unzipped_out));
 
 unzipped_in_fine = exp(i*thetaf).';
 
-unzipped_in_fine_image = gd.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
+unzipped_in_fine_image = weld.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
   ones(size(unzipped_in_fine)));
 
 unzipped_out_fine = exp(i*thetaf).';
-unzipped_out_fine_image = gd.switch_zipper_side(unzipped_out_fine, mapdata, 'point_id',...
+unzipped_out_fine_image = weld.switch_zipper_side(unzipped_out_fine, mapdata, 'point_id',...
   2*ones(size(unzipped_out_fine)));
