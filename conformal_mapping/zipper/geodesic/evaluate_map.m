@@ -22,7 +22,7 @@ function[w]= evaluate_map(z,mapdata,varargin)
 
 global handles;
 %opt = handles.common.InputSchema({'onshape'}, {false}, [], varargin{:});
-fa = handles.shapelab.conformal_mapping.geodesic.base_conformal_map;
+fa = handles.shapelab.conformal_mapping.zipper.geodesic.base_conformal_map;
 moebius = handles.shapelab.common.moebius;
 dab = handles.shapelab.common.disc_a_to_b;
 

@@ -53,22 +53,23 @@ inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
 defaults = {false, false, Inf, Inf, 1, 0.85, 'geodesic'};
 opt = handles.common.InputSchema(inputs,defaults,[],varargin{:});
 shapelab = handles.shapelab;
+zip = shapelab.conformal_mapping.zipper;
 moebius = shapelab.common.moebius;
 csqrt = handles.shapelab.common.positive_angle_square_root;
 moebius_inv = shapelab.common.moebius_inverse;
 switch lower(opt.type)
 case 'geodesic'
-  fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  fa = zip.geodesic.base_conformal_map;
   zipper = false;
 case 'slit'
-  fa = shapelab.conformal_mapping.slit.base_conformal_map;
+  fa = zip.slit.base_conformal_map;
   zipper = false;
 case 'zipper'
-  fa = shapelab.conformal_mapping.zipper.base_conformal_map;
+  fa = zip.zipper.base_conformal_map;
   zipper = true;
 case 'zipper_weld'
-  fa = shapelab.conformal_mapping.zipper.base_conformal_map;
-  fa_geo = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  fa = zip.zipper.base_conformal_map;
+  fa_geo = zip.geodesic.base_conformal_map;
   zipper = true;
 otherwise
   error(['Unrecognized algorithm specification ''' opt.type '''']);

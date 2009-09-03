@@ -1,5 +1,5 @@
 global handles;
-gd = handles.shapelab.conformal_mapping;
+gd = handles.shapelab.conformal_mapping.zipper;
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 

@@ -19,20 +19,21 @@ function[z]= evaluate_inverse_map(w,mapdata,varargin)
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 shapelab = handles.shapelab;
+zip = shapelab.conformal_mapping.zipper;
 switch lower(mapdata.type)
 case 'geodesic'
-  ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+  ifa = zip.geodesic.inverse_base_conformal_map;
   zipper = false;
 case 'slit'
-  ifa = shapelab.conformal_mapping.slit.inverse_base_conformal_map;
+  ifa = zip.slit.inverse_base_conformal_map;
   zipper = false;
 case 'zipper'
   warning('For exterior points, I can''t guarantee that this won''t return garbage');
-  ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
+  ifa = zip.zipper.inverse_base_conformal_map;
   zipper = true;
 case 'zipper_weld'
-  ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
-  ifa_geo = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+  ifa = zip.zipper.inverse_base_conformal_map;
+  ifa_geo = zip.geodesic.inverse_base_conformal_map;
   zipper = true;
 end
 

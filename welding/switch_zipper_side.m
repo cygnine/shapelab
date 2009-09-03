@@ -17,23 +17,24 @@ function[z] = switch_zipper_side(z,mapdata,varargin)
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {ones(size(z))}, [], varargin{:});
 shapelab = handles.shapelab;
+zip = shapelab.conformal_mapping.zipper;
 
 switch lower(mapdata.type)
 case 'geodesic'
-  ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
-  fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  ifa = zip.geodesic.inverse_base_conformal_map;
+  fa = zip.geodesic.base_conformal_map;
   zipper = false;
 case 'slit'
-  ifa = shapelab.conformal_mapping.slit.inverse_base_conformal_map;
-  fa = shapelab.conformal_mapping.slit.base_conformal_map;
+  ifa = zip.slit.inverse_base_conformal_map;
+  fa = zip.slit.base_conformal_map;
   zipper = false;
 case 'zipper'
   error('This isn''t a welding-capable map');
 case 'zipper_weld'
-  ifa_geo = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
-  fa_geo = shapelab.conformal_mapping.geodesic.base_conformal_map;
-  ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
-  fa = shapelab.conformal_mapping.zipper.base_conformal_map;
+  ifa_geo = zip.geodesic.inverse_base_conformal_map;
+  fa_geo = zip.geodesic.base_conformal_map;
+  ifa = zip.zipper.inverse_base_conformal_map;
+  fa = zip.zipper.base_conformal_map;
   zipper = true;
 otherwise
   error(['Unrecognized map type ' mapdata.type]);

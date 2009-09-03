@@ -1,7 +1,7 @@
 global handles;
 clover = handles.shapelab.test_shapes.polar_clover;
 plinspace = handles.shapelab.common.polar_linspace;
-gd = handles.shapelab.conformal_mapping;
+gd = handles.shapelab.conformal_mapping.zipper;
 
 N = 100;
 opt.lobes = 4;
