@@ -11,13 +11,15 @@ hs.base = fileparts(mfilename('fullpath'));
 % Add subdirectories manually
 hs.conformal_mapping.base = fullfile(hs.base, 'conformal_mapping');
 hs.conformal_mapping.debug.base = fullfile(hs.conformal_mapping.base, 'debug');
-  hs.conformal_mapping.geodesic.base = ...
-    fullfile(hs.conformal_mapping.base, 'geodesic');
-  hs.conformal_mapping.slit.base = ...
-    fullfile(hs.conformal_mapping.base, 'slit');
-  hs.conformal_mapping.zipper.base = ...
-    fullfile(hs.conformal_mapping.base, 'zipper');
+hs.conformal_mapping.zipper.base = fullfile(hs.conformal_mapping.base, 'zipper');
+  hs.conformal_mapping.zipper.geodesic.base = ...
+    fullfile(hs.conformal_mapping.zipper.base, 'geodesic');
+  hs.conformal_mapping.zipper.slit.base = ...
+    fullfile(hs.conformal_mapping.zipper.base, 'slit');
+  hs.conformal_mapping.zipper.zipper.base = ...
+    fullfile(hs.conformal_mapping.zipper.base, 'zipper');
 hs.test_shapes.base = fullfile(hs.base, 'test_shapes');
+hs.welding.base = fullfile(hs.base, 'welding');
 hs.common.base = fullfile(hs.base, 'common');
 
 pathadditions = cell(0);
