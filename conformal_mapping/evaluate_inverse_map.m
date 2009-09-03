@@ -22,15 +22,25 @@ shapelab = handles.shapelab;
 switch lower(mapdata.type)
 case 'geodesic'
   ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+  zipper = false;
 case 'slit'
   ifa = shapelab.conformal_mapping.slit.inverse_base_conformal_map;
+  zipper = false;
 case 'zipper'
+  warning('For exterior points, I can''t guarantee that this won''t return garbage');
   ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
+  zipper = true;
+case 'zipper_weld'
+  ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
+  ifa_geo = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+  zipper = true;
 end
 
-moebius = handles.shapelab.common.moebius;
-moebius_inv = handles.shapelab.common.moebius_inverse;
-csqrt = handles.shapelab.common.positive_angle_square_root;
+moebius = shapelab.common.moebius;
+moebius_inv = shapelab.common.moebius_inverse;
+csqrt = shapelab.common.positive_angle_square_root;
+pcpow = shapelab.common.positive_angle_exponential;
+ncpow = shapelab.common.negative_angle_exponential;
 
 % We must deal with three cases:
 w0 = w(opt.point_id==0);
@@ -64,26 +74,39 @@ if any(opt.point_id==0)
   % Invert the terminal map
   m = [1, 0;...
        -mapdata.a_array(end), 1];
-  if strcmpi(opt.type, 'zipper')
-    alpha = pi - angle(moebius(c_array(end),m));
-    w0 = exp(i*(pi-alpha))*(w0*sign(opt.winding_number).^(alpha/pi));
+  if strcmpi(mapdata.type, 'zipper')
+    alpha = pi - angle(moebius(mapdata.c_array(end),m));
+    %w0 = exp(i*(pi-alpha))*(w0*sign(mapdata.winding_number)).^(alpha/pi);
+    w0 = w0*sign(mapdata.winding_number);
+    % regrettably, the non-conformal terminal map requires different treatment
+    % of interior and exterior points
+    w0(int_points) = exp(i*(pi-alpha))*pcpow(w0(int_points), 'alpha', alpha/pi);
+    w0(ext_points) = exp(i*(pi-alpha))*ncpow(w0(ext_points), 'alpha', alpha/pi);
+    w0 = moebius_inv(w0,m);
+  elseif strcmpi(mapdata.type, 'zipper_weld')
+    % Do the geodesic/slit terminal map inverse + 1 inverse geodesic base map
+    w0 = csqrt(-sign(mapdata.winding_number)*w0);
+    w0 = moebius_inv(w0,m);
+
+    % 1 geodesic inverse base map
+    ifa_opt.point_id = zeros(size(w0));
+    ifa_opt.cut_magnitude = mapdata.zip_magnitude;
+    w0 = ifa_geo(w0, mapdata.c_array(end), ifa_opt);
   else
     % This should map H (interior) ----> left-half plane (right-half if winding
     % number is negative). Technically, this is a special case of the zipper
     % type. Meh.
     w0 = csqrt(-sign(mapdata.winding_number)*w0);
+    w0 = moebius_inv(w0,m);
   end
-
-  w0 = moebius_inv(w0,m);
 
   % Now loop through a_array
   N = length(mapdata.a_array)+1;
 
   ifa_opt.point_id = zeros(size(w0));
   ifa_opt.cut_magnitude = mapdata.zip_magnitude;
-  %for q = (N-2):-1:1
   for q = mapdata.N_teeth:-1:1
-    if strcmpi(opt.type, 'zipper')
+    if zipper
       w0 = ifa(w0, mapdata.c_array(q), mapdata.a_array(q), ifa_opt);
     else
       w0 = ifa(w0, mapdata.a_array(q), ifa_opt);
@@ -91,7 +114,11 @@ if any(opt.point_id==0)
   end
 
   % Now it's easy-peasy:
-  w0 = moebius_inv((w0/i).^2, mapdata.m_initial);
+  if zipper
+    w0 = moebius_inv(w0.^2, mapdata.m_initial);
+  else
+    w0 = moebius_inv((w0/i).^2, mapdata.m_initial);
+  end
   z(opt.point_id==0) = w0;
 end
 
@@ -108,19 +135,41 @@ if any(opt.point_id==1)
   % apply inv(m_in) on interior
   w1 = moebius_inv(w1, mapdata.m_in);
 
-  if strcmpi(opt.type, 'zipper')
-    error('Not yet implemented');
+  if strcmpi(mapdata.type, 'zipper')
+    m = [1 0; ...
+         -mapdata.a_array(end) 1];
+    alpha = pi - angle(moebius(mapdata.c_array(end),m));
+    w1 = w1*sign(mapdata.winding_number);
+    temp = w1;
+    w1(temp<0) = -abs(w1(temp<0)).^(alpha/pi);
+    w1(temp>=0) = exp(i*(pi-alpha))*(w1(temp>=0)).^(alpha/pi);
+    w1 = moebius_inv(w1,m);
+  elseif strcmpi(mapdata.type, 'zipper_weld')
+    % Do the geodesic/slit terminal map inverse + 1 inverse geodesic base map
+    w1 = w1*-sign(mapdata.winding_number);
+    temp = w1;
+    w1(temp<0) = i*sqrt(abs(temp(temp<0)));
+    w1(temp>=0) = -sqrt(temp(temp>=0));
+    % Invert the terminal map (moebius)
+    m = [1, 0;...
+         -mapdata.a_array(end), 1];
+    w1 = moebius_inv(w1,m);
+
+    % 1 geodesic inverse base map
+    ifa_opt.point_id = ones(size(w1));
+    ifa_opt.point_id(abs(imag(w1))>1e-10) = 0;
+    ifa_opt.cut_magnitude = mapdata.zip_magnitude;
+    w1 = ifa_geo(w1, mapdata.c_array(end), ifa_opt);
   else
     w1 = w1*-sign(mapdata.winding_number);
     temp = w1;
     w1(temp<0) = i*sqrt(abs(temp(temp<0)));
     w1(temp>=0) = -sqrt(temp(temp>=0));
+    % Invert the terminal map (moebius)
+    m = [1, 0;...
+         -mapdata.a_array(end), 1];
+    w1 = moebius_inv(w1,m);
   end
-
-  % Invert the terminal map (moebius)
-  m = [1, 0;...
-       -mapdata.a_array(end), 1];
-  w1 = moebius_inv(w1,m);
 
   ifa_opt.point_id = ones(size(w1));
   ifa_opt.point_id(abs(imag(w1))>1e-10) = 0;
@@ -132,12 +181,20 @@ if any(opt.point_id==1)
 
   N = length(mapdata.a_array)+1;
   for q = (N-2):-1:1
-    w1 = ifa(w1, mapdata.a_array(q), ifa_opt);
+    if zipper
+      w1 = ifa(w1, mapdata.c_array(q), mapdata.a_array(q), ifa_opt);
+    else
+      w1 = ifa(w1, mapdata.a_array(q), ifa_opt);
+    end
     winterior = abs(imag(w1))>0;
     ifa_opt.point_id(winterior) = 0;
   end
 
-  w1 = moebius_inv((w1/i).^2, mapdata.m_initial);
+  if zipper
+    w1 = moebius_inv(w1.^2, mapdata.m_initial);
+  else
+    w1 = moebius_inv((w1/i).^2, mapdata.m_initial);
+  end
   z(opt.point_id==1) = w1;
 end
 
@@ -156,14 +213,44 @@ if any(opt.point_id==2)
   % apply inv(m_out) on exterior
   w2 = moebius_inv(w2, mapdata.m_out);
 
-  w2 = w2*-sign(mapdata.winding_number);
-  w2(w2<0) = i*sqrt(abs(w2(w2<0)));
-  w2(w2>=0) = sqrt(w2(w2>=0));
+  if strcmpi(mapdata.type, 'zipper')
+    m = [1 0; ...
+         -mapdata.a_array(end) 1];
+    alpha = pi - angle(moebius(mapdata.c_array(end),m));
+    w2 = w2*sign(mapdata.winding_number);
+    temp = w2;
+    w2(temp<0) = exp(i*(pi-alpha))*(w2(temp<0)).^(alpha/pi);
+    w2(temp>=0) = w2(temp>=0).^(alpha/pi);
+    %w2(temp>=0) = sqrt(w2(temp>=0));
+    w2 = moebius_inv(w2,m);
+  elseif strcmpi(mapdata.type, 'zipper_weld')
+    % Do the geodesic/slit terminal map inverse + 1 inverse geodesic base map
+    w2 = w2*-sign(mapdata.winding_number);
+    temp = w2;
+    w2(temp<0) = i*sqrt(abs(w2(temp<0)));
+    w2(temp>=0) = sqrt(w2(temp>=0));
+    % Invert the terminal map (moebius)
+    m = [1, 0;...
+         -mapdata.a_array(end), 1];
+    w2 = moebius_inv(w2,m);
 
-  % Invert the terminal map (moebius)
-  m = [1, 0;...
-       -mapdata.a_array(end), 1];
-  w2 = moebius_inv(w2,m);
+    % 1 geodesic inverse base map
+    ifa_opt.point_id = ones(size(w2));
+    ifa_opt.point_id(abs(imag(w2))>1e-10) = 0;
+    ifa_opt.cut_magnitude = mapdata.zip_magnitude;
+    w2 = ifa_geo(w2, mapdata.c_array(end), ifa_opt);
+  else
+    w2 = w2*-sign(mapdata.winding_number);
+    temp = w2;
+    w2(temp<0) = i*sqrt(abs(w2(temp<0)));
+    w2(temp>=0) = sqrt(w2(temp>=0));
+    % Invert the terminal map (moebius)
+    m = [1, 0;...
+         -mapdata.a_array(end), 1];
+    w2 = moebius_inv(w2,m);
+  end
+
+
 
   ifa_opt.point_id = ones(size(w2));
   ifa_opt.point_id(abs(imag(w2))>1e-10) = 0;
@@ -175,11 +262,19 @@ if any(opt.point_id==2)
 
   N = length(mapdata.a_array)+1;
   for q = (N-2):-1:1
-    w2 = ifa(w2, mapdata.a_array(q), ifa_opt);
+    if zipper
+      w2 = ifa(w2, mapdata.c_array(q), mapdata.a_array(q), ifa_opt);
+    else
+      w2 = ifa(w2, mapdata.a_array(q), ifa_opt);
+    end
     winterior = abs(imag(w2))>0;
     ifa_opt.point_id(winterior) = 0;
   end
 
-  w2 = moebius_inv((w2/i).^2, mapdata.m_initial);
+  if zipper
+    w2 = moebius_inv(w2.^2, mapdata.m_initial);
+  else
+    w2 = moebius_inv((w2/i).^2, mapdata.m_initial);
+  end
   z(opt.point_id==2) = w2;
 end

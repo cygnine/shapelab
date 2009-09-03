@@ -13,9 +13,6 @@ function[z] = switch_zipper_side(z,mapdata,varargin)
 %
 %     z(point_id==2) -----> points on the exterior boundary of the unit disc
 %     that you want to map onto the interior.
-%
-%     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
-%          conformal mapping", 2006.
 
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {ones(size(z))}, [], varargin{:});
@@ -25,11 +22,21 @@ switch lower(mapdata.type)
 case 'geodesic'
   ifa = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
   fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  zipper = false;
 case 'slit'
   ifa = shapelab.conformal_mapping.slit.inverse_base_conformal_map;
   fa = shapelab.conformal_mapping.slit.base_conformal_map;
+  zipper = false;
 case 'zipper'
-  error('not yet implemented');
+  error('This isn''t a welding-capable map');
+case 'zipper_weld'
+  ifa_geo = shapelab.conformal_mapping.geodesic.inverse_base_conformal_map;
+  fa_geo = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
+  fa = shapelab.conformal_mapping.zipper.base_conformal_map;
+  zipper = true;
+otherwise
+  error(['Unrecognized map type ' mapdata.type]);
 end
 
 moebius = handles.shapelab.common.moebius;
@@ -39,15 +46,13 @@ csqrt = handles.shapelab.common.positive_angle_square_root;
 N = length(mapdata.a_array)+1;
 % We must deal with two cases:
 zint_id = opt.point_id==1;
+zext_id = opt.point_id==2;
 z_tooth_indicator = zeros(size(z));
 % A faster way to do the following would be to sort the input, store only the
 % starting values of each bin, and then apply the inverse of the permutation
 % operator at the end to return the sorted values to their unsorted initial
 % state.
-z_tooth_indicator_bins = cell([N-2,1]);
-
-zext_id = opt.point_id==2;
-%zext_tooth_indicator = zeros(size(zext_id));
+z_tooth_indicator_bins = cell([mapdata.N_teeth+1,1]);
 
 if not(all(abs(abs(z)-1)<1e-10))
   error('It doesn''t look like you gave me points on the unit circle....');
@@ -61,6 +66,7 @@ z = real(moebius_inv(z,m));
 z(zint_id) = moebius_inv(z(zint_id), mapdata.m_in);
 z(zext_id) = moebius_inv(z(zext_id), mapdata.m_out);
 
+% This slit/geodesic terminal map is the same for all cases
 z = z*-sign(mapdata.winding_number);
 z_copy = z;
 z(z_copy<0) = i*sqrt(abs(z_copy(z_copy<0)));
@@ -76,12 +82,35 @@ ifa_opt.point_id = ones(size(z));
 ifa_opt.point_id(abs(imag(z))>1e-10) = 0;
 ifa_opt.cut_magnitude = mapdata.zip_magnitude;
 opt_input = ifa_opt;
-% See evaluate_inverse_map to (semi-)understand this
-for q = (N-2):-1:1
+
+if zipper % Then do 1 inverse geodesic map
+  unzipped = ifa_opt.point_id==1;
+  opt_input.point_id = ifa_opt.point_id(unzipped);
+  z_temp = ifa_geo(z(unzipped), mapdata.c_array(end), opt_input);
+
+  % These points changed from being unzipped to being zipped_up
+  newly_zipped = abs(imag(z_temp))>0;
+  now_zipped = unzipped;
+  temp = unzipped(unzipped);
+  temp(not(newly_zipped)) = 0;
+  now_zipped(unzipped) = temp;
+
+  ifa_opt.point_id(now_zipped) = 0;
+  z_tooth_indicator(now_zipped) = mapdata.N_teeth + 1;
+  z_tooth_indicator_bins{mapdata.N_teeth+1} = find(now_zipped);
+  z(unzipped) = z_temp;
+end
+
+% Zip up all the zipper teeth
+for q = mapdata.N_teeth:-1:1
   % Only invert the map for points that are unzipped
   unzipped = ifa_opt.point_id==1;
   opt_input.point_id = ifa_opt.point_id(unzipped);
-  z_temp = ifa(z(unzipped), mapdata.a_array(q), opt_input);
+  if zipper
+    z_temp = ifa(z(unzipped), mapdata.c_array(q), mapdata.a_array(q), opt_input);
+  else
+    z_temp = ifa(z(unzipped), mapdata.a_array(q), opt_input);
+  end
   % These points changed from being unzipped to being zipped_up
   newly_zipped = abs(imag(z_temp))>0;
   now_zipped = unzipped;
@@ -94,17 +123,34 @@ for q = (N-2):-1:1
   z_tooth_indicator_bins{q} = find(now_zipped);
   z(unzipped) = z_temp;
 end
+z(ifa_opt.point_id==1) = -z(ifa_opt.point_id==1);
 
 % Ok, now everything is zipped up. Time to unzipper it all. 
 unzip = false(size(z));
 unzip(ifa_opt.point_id==1) = true; % Some points are still on R
 ifa_input.point_id = ones(size(z));
 ifa_input.point_id(unzip) = 2;
-for q = 1:(N-2)
+for q = 1:(mapdata.N_teeth)
   % Add on points that need to be unzippered
   unzip(z_tooth_indicator_bins{q}) = true;
   opt_input.point_id = ifa_input.point_id(unzip);
-  [interior,exterior] = fa(z(unzip), mapdata.a_array(q), opt_input);
+  if zipper
+    [interior,exterior] = fa(z(unzip), mapdata.c_array(q), mapdata.a_array(q), opt_input);
+  else
+    [interior,exterior] = fa(z(unzip), mapdata.a_array(q), opt_input);
+  end
+
+  % Distribute interior/exterior points to where they're supposed to go
+  z(unzip & zext_id) = interior(zext_id(unzip));
+  z(unzip & zint_id) = exterior(zint_id(unzip));
+  ifa_input.point_id(unzip) = 2; % all the unzipped points are on \mathbb{R}
+end
+
+% If zipper, do one more geodesic unzipping
+if zipper
+  unzip(z_tooth_indicator_bins{mapdata.N_teeth+1}) = true;
+  opt_input.point_id = ifa_input.point_id(unzip);
+  [interior,exterior] = fa_geo(z(unzip), mapdata.c_array(end), opt_input);
 
   % Distribute interior/exterior points to where they're supposed to go
   z(unzip & zext_id) = interior(zext_id(unzip));

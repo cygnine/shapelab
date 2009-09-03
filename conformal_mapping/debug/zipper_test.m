@@ -1,5 +1,6 @@
 global handles;
 clover = handles.shapelab.test_shapes.polar_clover;
+plinspace = handles.shapelab.common.polar_linspace;
 gd = handles.shapelab.conformal_mapping;
 
 N = 100;
@@ -16,36 +17,26 @@ zint = clover(10*N,opt);
 opt.node_locations = 'exterior';
 zout = clover(10*N,opt);
 
-mapdata = gd.compute_map_coordinates(z,'z_in', 0, 'w_in', 0, ...
-      'type', 'zipper');
+mapdata = gd.compute_map_coordinates(z,'z_in', 0.8, 'w_in', 0, ...
+      'z_out', -1.1*i, 'w_out', Inf, 'type', 'zipper_weld');
 
 tin = unwrap(angle(mapdata.vertices_in));
 tout = unwrap(angle(mapdata.vertices_out));
 
-wint = zeros([N*M 1]);
-for q = 1:M
-  wint((q-1)*length(z)+1:q*length(z)) = exp(i*theta).*(q-1)/M;
-end
-wout = zeros([N*M 1]);
-for q = 1:M
-  wout((q-1)*length(z)+1:q*length(z)) = exp(i*theta).*(q+M)/M;
-end
+wint = plinspace(opt.M, N, 'r0',0, 'r1', (opt.M-1)/opt.M);
+wout = plinspace(opt.M, N, 'r0',1+1/opt.M, 'r1', 2);
+
 wint_image = gd.evaluate_inverse_map(wint,mapdata);
 wout_image = gd.evaluate_inverse_map(wout,mapdata);
-%
-%wout = zeros([N*M 1]);
-%for q = 1:M
-%  wout((q-1)*length(z)+1:q*length(z)) = exp(i*theta).*(q+M)/M;
-%end
 
-unzipped_in_fine = exp(i*thetaf).';
+unzipped_in_fine = plinspace(1,10*N,'r0',1,'r1',1);
 unzipped_in_fine_image = gd.switch_zipper_side(unzipped_in_fine, mapdata, 'point_id',...
   ones(size(unzipped_in_fine)));
 unzipped_in_fine_shape = gd.evaluate_inverse_map(unzipped_in_fine, mapdata,...
           'point_id', ones(size(unzipped_in_fine)));
 
-unzipped_out_fine = exp(i*thetaf).';
+unzipped_out_fine = plinspace(1,10*N,'r0',1,'r1',1);
 unzipped_out_fine_image = gd.switch_zipper_side(unzipped_out_fine, mapdata, 'point_id',...
   2*ones(size(unzipped_out_fine)));
 unzipped_out_fine_shape = gd.evaluate_inverse_map(unzipped_out_fine, mapdata,...
-          'point_id', ones(size(unzipped_out_fine)));
+          'point_id', 2*ones(size(unzipped_out_fine)));

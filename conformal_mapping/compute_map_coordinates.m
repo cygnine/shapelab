@@ -50,7 +50,7 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 global handles;
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
           'zip_magnitude','type'};
-defaults = {false, false, false, false, 1, 0.85, 'geodesic'};
+defaults = {false, false, Inf, Inf, 1, 0.85, 'geodesic'};
 opt = handles.common.InputSchema(inputs,defaults,[],varargin{:});
 shapelab = handles.shapelab;
 moebius = shapelab.common.moebius;
@@ -59,10 +59,17 @@ moebius_inv = shapelab.common.moebius_inverse;
 switch lower(opt.type)
 case 'geodesic'
   fa = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  zipper = false;
 case 'slit'
   fa = shapelab.conformal_mapping.slit.base_conformal_map;
+  zipper = false;
 case 'zipper'
   fa = shapelab.conformal_mapping.zipper.base_conformal_map;
+  zipper = true;
+case 'zipper_weld'
+  fa = shapelab.conformal_mapping.zipper.base_conformal_map;
+  fa_geo = shapelab.conformal_mapping.geodesic.base_conformal_map;
+  zipper = true;
 otherwise
   error(['Unrecognized algorithm specification ''' opt.type '''']);
 end
@@ -77,17 +84,13 @@ end
 
 %% Append z_out, z_in to end of vector
 % If z_out was not specified, assume it's infinity
-if isa(opt.z_out,'logical') & opt.z_out==false
-  z_n(end+1) = Inf;
-else
-  z_n(end+1) = opt.z_out;
-end
+z_n(end+1) = opt.z_out;
 
 % No matter what z_in is, tack it on
 z_n(end+1) = opt.z_in;
 
 %% These are needed as output for the initial map
-if strcmpi(opt.type, 'zipper')
+if zipper
   z_initial = [z_n(1); z_n(2); z_n(3)];
 else
   z_initial = [z_n(1); z_n(2)];
@@ -96,22 +99,19 @@ end
 %% Initial map:
 % After this line, array order is now z(2),z(3),...,z(n),z_out,z_in,z(1)
 zeta_n = circshift(z_n,-1);
-% This is weird to me: taking the sqrt branch cut at pi instead of 2*pi. I don't
-% understand...just following Marshall. If I use a sqrt branch cut at 2*pi (as
-% is done in the rest of the algorithm), I shouldn't need the i factor.
-if strcmpi(opt.type, 'zipper')
+
+if zipper
   m_initial = [(z_initial(2) - z_initial(1))*[1, -z_initial(3)]; ...
                (z_initial(2) - z_initial(3))*[1, -z_initial(1)]];
-  %zeta_n = i*sqrt(moebius(zeta_n(3:end), m_initial));
   zeta_n = csqrt(moebius(zeta_n(3:end), m_initial));
-  zeta_n(end) = Inf;
+  zeta_n(end) = Inf; % sadly, sqrt(complex Inf) = NaN
 
   unzipped_in = [Inf; -1; 0]; % original z_1, z_2, z_3
   unzipped_out = [Inf; 1; 0]; % original z_1, z_2, z_3
 else
   m_initial = [1 -z_initial(2);...
                1 -z_initial(1)];
-  zeta_n = i*sqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
+  zeta_n = i*csqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
   zeta_n(end) = Inf; % sadly, sqrt(complex Inf) = NaN
 
   unzipped_in = [Inf;0]; % original z_1, z_2
@@ -121,7 +121,7 @@ end
 
 %% Initialization for looping over teeth
 fa_opt.cut_magnitude = opt.zip_magnitude;
-if strcmpi(opt.type, 'zipper')
+if zipper
   N_teeth = (N-2)/2 - 1;
 else
   N_teeth = N-2;
@@ -133,7 +133,7 @@ c_array = zeros([N_teeth+1,1]); % Only needed for zipper, really
 
 %% Looping over teeth
 for q = 1:N_teeth
-  if strcmpi(opt.type, 'zipper')
+  if zipper
     % Need next two points to define the map:
     c_array(q) = zeta_n(1);
     a_array(q) = zeta_n(2);
@@ -191,6 +191,35 @@ if strcmpi(opt.type, 'zipper')
   % map unzipped points as well:
   unzipped_in = sign(opt.winding_number)*(exp(-i*(pi-alpha))*moebius(unzipped_in,m)).^(pi/alpha);
   unzipped_out = sign(opt.winding_number)*(exp(-i*(pi-alpha))*moebius(unzipped_out,m)).^(pi/alpha);
+elseif strcmpi(opt.type, 'zipper_weld')
+  % Use the last point z(N) to do a geodesic arc, then finish off in same way as
+  % geodesic algorithm
+  c_array(end) = zeta_n(1);
+
+  temp = zeros(size(zeta_n(2:end)));
+  temp(end) = 2;
+  fa_opt.point_id = temp;
+  zeta_n = fa_geo(zeta_n(2:end),c_array(end),fa_opt);
+
+  temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
+  fa_opt.point_id = temp;
+  [unzipped_in,garbage] = fa_geo(unzipped_in,c_array(end),fa_opt);
+  [garbage,unzipped_out] = fa_geo(unzipped_out,c_array(end),fa_opt);
+
+  % Now add 0 to the list of zipped_in/out points:
+  unzipped_in(end+1) = 0;
+  unzipped_out(end+1) = 0;
+
+  % Now do same terminal map as in geodesic algorithm
+  a_array(end) = 1./zeta_n(3);
+  m = [ 1              0; ...
+       -a_array(end) 1];
+  %% Care about where z_out + z_in points go:
+  zeta_n = -sign(opt.winding_number)*moebius(zeta_n(1:2), m).^2;
+
+  % map unzipped points as well:
+  unzipped_in = -sign(opt.winding_number)*moebius(unzipped_in,m).^2;
+  unzipped_out = -sign(opt.winding_number)*moebius(unzipped_out,m).^2;
 else
   % Finally, the terminal map. By now, only 3 points are left: z_out, z_in, z(1)
   a_array(end) = 1/zeta_n(3);
@@ -216,13 +245,16 @@ m4 = [0, -1;...
 m5 = [i, -i; ...
       -1, -1]; % invert m1
 
-% Did the user specify the exterior point?
-if isa(opt.w_out,'logical') & opt.z_out==false
-  % Map infinity to infinity
-  map_to = 0;
-else
-  map_to = 1/opt.w_out;
-end
+% Always specify the exterior map
+map_to = 1/opt.w_out;
+%%if isa(opt.w_out,'logical') & opt.z_out==false
+%if isa(opt.w_out,'logical')
+%  % Map infinity to infinity
+%  opt.w_out = Inf;
+%  map_to = 0;
+%else
+%  map_to = 1/opt.w_out;
+%end
 
 a = moebius(zeta_n(1), m2*m1); % image of z_out to disc
 m3a = [abs(a)/a -abs(a); ...
@@ -269,7 +301,7 @@ unzipped_out = moebius(unzipped_out, m);
 [mapdata.a_array, mapdata.zip_magnitude, mapdata.z_in, mapdata.w_in,...
  mapdata.z_out, mapdata.w_out, mapdata.vertices_in, mapdata.vertices_out,...
  mapdata.winding_number, mapdata.m_in, mapdata.m_out, mapdata.m_initial,...
- mapdata.type, mapdata.c_array] = ...
+ mapdata.type, mapdata.c_array, mapdata.N_teeth] = ...
  deal(a_array, opt.zip_magnitude,opt.z_in, opt.w_in, opt.z_out, opt.w_out, ...
       unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial,...
-      opt.type, c_array);
+      opt.type, c_array, N_teeth);

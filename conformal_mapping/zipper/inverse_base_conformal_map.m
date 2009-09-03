@@ -1,5 +1,5 @@
 function[w] = inverse_base_conformal_map(z,c,a,varargin)
-% [v,w] = inverse_base_conformal_map(z,c,a,{point_id=zeros(size(z)),cut_magnitude=abs(a))
+% [w] = inverse_base_conformal_map(z,c,a,{point_id=zeros(size(z)),cut_magnitude=abs(a))
 %
 %     Referring to [1], evaluates the inverse of the conformal mapping function
 %     f_a, which is a basic building block for the `zipper algorithm'
@@ -38,4 +38,4 @@ else
 end
 
 w = zipup(z,d,'point_id',opt.point_id);
-z = moebius_inv(z,m);
+w = moebius_inv(w,m);
