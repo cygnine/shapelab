@@ -15,6 +15,8 @@ hs.conformal_mapping.debug.base = fullfile(hs.conformal_mapping.base, 'debug');
     fullfile(hs.conformal_mapping.base, 'geodesic');
   hs.conformal_mapping.slit.base = ...
     fullfile(hs.conformal_mapping.base, 'slit');
+  hs.conformal_mapping.zipper.base = ...
+    fullfile(hs.conformal_mapping.base, 'zipper');
 hs.test_shapes.base = fullfile(hs.base, 'test_shapes');
 hs.common.base = fullfile(hs.base, 'common');
 

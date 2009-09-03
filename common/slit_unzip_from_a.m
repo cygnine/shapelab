@@ -17,7 +17,7 @@ function[v,w] = slit_unzip_from_a(z,a,varargin)
 % [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %      mapping", 2006.
 %
-%     TODO: currently using bisection...get Newton's method to converge
+%     TODO: currently using bisection on 2...get Newton's method to converge
 
 global handles;
 opt = handles.common.InputSchema({'point_id'}, {zeros(size(z))}, [], varargin{:});
@@ -84,7 +84,7 @@ if any(interior)
   fnorm = z(interior)/C;
   f = @(x) (x-p./fnorm).^p.*(x+q./fnorm).^q;
   df = @(x) p*((x+q./fnorm)./(x-p./fnorm)).^q + q*((x-p./fnorm)./(x+q./fnorm)).^p;
-  [v(interior),flag] = newton(v0(interior)./(fnorm), f, df, 'F', ones(size(z(interior))),'fx_tol',0,'x_tol',0,'maxiter',10);
+  [v(interior),flag] = newton(v0(interior)./(fnorm), f, df, 'F', ones(size(z(interior))),'fx_tol',0,'x_tol',0,'maxiter',20);
   if any(abs(f(v(interior)) - 1)>1e-8)
     error('Newton''s method didn''t converge');
   end
@@ -145,7 +145,6 @@ if any(boundary)
     end
 
     if any(~flags)
-      %v1(~flags) = -1e2*ones(temp);
       v1(~flags) = (temp(~flags)+2*p-1)/C - 1e2;
       v2(~flags) = -q*ones(size(temp(~flags)));
     end

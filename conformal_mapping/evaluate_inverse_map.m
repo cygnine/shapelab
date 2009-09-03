@@ -25,7 +25,7 @@ case 'geodesic'
 case 'slit'
   ifa = shapelab.conformal_mapping.slit.inverse_base_conformal_map;
 case 'zipper'
-  error('not yet implemented');
+  ifa = shapelab.conformal_mapping.zipper.inverse_base_conformal_map;
 end
 
 moebius = handles.shapelab.common.moebius;
@@ -61,13 +61,19 @@ if any(opt.point_id==0)
   % apply inv(m_out) on exterior
   w0(ext_points) = moebius_inv(w0(ext_points), mapdata.m_out);
 
-  % This should map H (interior) ----> left-half plane (right-half if winding
-  % number is negative)
-  w0 = csqrt(-sign(mapdata.winding_number)*w0);
-
-  % Invert the terminal map (moebius)
+  % Invert the terminal map
   m = [1, 0;...
        -mapdata.a_array(end), 1];
+  if strcmpi(opt.type, 'zipper')
+    alpha = pi - angle(moebius(c_array(end),m));
+    w0 = exp(i*(pi-alpha))*(w0*sign(opt.winding_number).^(alpha/pi));
+  else
+    % This should map H (interior) ----> left-half plane (right-half if winding
+    % number is negative). Technically, this is a special case of the zipper
+    % type. Meh.
+    w0 = csqrt(-sign(mapdata.winding_number)*w0);
+  end
+
   w0 = moebius_inv(w0,m);
 
   % Now loop through a_array
@@ -75,8 +81,13 @@ if any(opt.point_id==0)
 
   ifa_opt.point_id = zeros(size(w0));
   ifa_opt.cut_magnitude = mapdata.zip_magnitude;
-  for q = (N-2):-1:1
-    w0 = ifa(w0, mapdata.a_array(q), ifa_opt);
+  %for q = (N-2):-1:1
+  for q = mapdata.N_teeth:-1:1
+    if strcmpi(opt.type, 'zipper')
+      w0 = ifa(w0, mapdata.c_array(q), mapdata.a_array(q), ifa_opt);
+    else
+      w0 = ifa(w0, mapdata.a_array(q), ifa_opt);
+    end
   end
 
   % Now it's easy-peasy:
@@ -97,10 +108,14 @@ if any(opt.point_id==1)
   % apply inv(m_in) on interior
   w1 = moebius_inv(w1, mapdata.m_in);
 
-  w1 = w1*-sign(mapdata.winding_number);
-  temp = w1;
-  w1(temp<0) = i*sqrt(abs(temp(temp<0)));
-  w1(temp>=0) = -sqrt(temp(temp>=0));
+  if strcmpi(opt.type, 'zipper')
+    error('Not yet implemented');
+  else
+    w1 = w1*-sign(mapdata.winding_number);
+    temp = w1;
+    w1(temp<0) = i*sqrt(abs(temp(temp<0)));
+    w1(temp>=0) = -sqrt(temp(temp>=0));
+  end
 
   % Invert the terminal map (moebius)
   m = [1, 0;...
