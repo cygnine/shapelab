@@ -20,6 +20,7 @@ hs.conformal_mapping.zipper.base = fullfile(hs.conformal_mapping.base, 'zipper')
     fullfile(hs.conformal_mapping.zipper.base, 'zipper');
 hs.test_shapes.base = fullfile(hs.base, 'test_shapes');
 hs.welding.base = fullfile(hs.base, 'welding');
+hs.examples.base = fullfile(hs.base, 'examples');
 hs.common.base = fullfile(hs.base, 'common');
 
 pathadditions = cell(0);
