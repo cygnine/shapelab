@@ -239,7 +239,7 @@ plot(tin, tin_geo_image, 'r.', tout_geo_image, tout, 'b.', tin_geo, tout_geo, 'k
 ltex(xlabel('$\theta_{int}$'));
 ltex(ylabel('$\theta_{ext}$'));
 ltex(title('Geodesic fingerprint'));
-ltex(legend('Interpolating $\theta_{ext}$', 'Interpolating $\theta_{int}$', 'Original fingerprint samples');
+ltex(legend('Interpolating $\theta_{ext}$', 'Interpolating $\theta_{int}$', 'Original fingerprint samples'));
 subplot(2,2,2);
 plot(tin, tin_slit_image, 'r.', tout_slit_image, tout, 'b.', tin_slit, tout_slit, 'k*');
 ltex(xlabel('$\theta_{int}$'));
