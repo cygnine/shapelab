@@ -11,6 +11,7 @@ shapelab = handles.shapelab;  % shapelab stuff
 zipper = shapelab.conformal_mapping.zipper;
 welding = handles.shapelab.welding;
 clover = shapelab.test_shapes.polar_clover;
+fprint_norm = welding.normalize_fingerprint;
 
 % First construct points on the clover:
 clover_opt.lobes = 4;  % 4-leafed
@@ -217,20 +218,30 @@ axis(temp);
 
 fprintf('Interpolating fingerprint values....\n');
 % Let's say I want tout as a function of tin for equispaced tin:
-tin = linspace(-pi, pi, 1000);
+tin = linspace(0, 2*pi, 1000);
 
 tin_geo_image = welding.interpolate_fingerprint(geo_map, 'theta_int', tin);
 tin_slit_image = welding.interpolate_fingerprint(slit_map, 'theta_int', tin);
 tin_zip_image = welding.interpolate_fingerprint(zip_map, 'theta_int', tin);
 
 % Or the "Lebesgue" way...specify tout:
-tout = linspace(-pi,pi,1000);
+tout = linspace(0, 2*pi,1000);
 tout_geo_image = welding.interpolate_fingerprint(geo_map, 'theta_ext', tout);
 tout_slit_image = welding.interpolate_fingerprint(slit_map, 'theta_ext', tout);
 tout_zip_image = welding.interpolate_fingerprint(zip_map, 'theta_ext', tout);
 
-% Matlab adds funny factors if we unwrap the images, so just keep them as they
-% are...the purpose is figure 5 to see that indeed they are interpolations
+% Now for normalization of the fingerprints so that they line up. *All* maps are
+% normalized so that (tin, tout) = (0,0) corresponds to the first vertex of the
+% shape, so all these points line up. In all the inputs above (tin or tout), the
+% first entry was 0, so we can normalize all these points back down to 0 to line
+% everything up. There's a function that does this automatically. 
+[tin, tin_geo_image] = fprint_norm(tin,tin_geo_image);
+[tin, tin_slit_image] = fprint_norm(tin,tin_slit_image);
+[tin, tin_zip_image] = fprint_norm(tin,tin_zip_image);
+
+[tout_geo_image, tout] = fprint_norm(tout_geo_image,tout);
+[tout_slit_image, tout] = fprint_norm(tout_slit_image,tout);
+[tout_zip_image, tout] = fprint_norm(tout_zip_image,tout);
 
 % Let's see that indeed we have interpolated the functions:
 figure(5);

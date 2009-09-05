@@ -44,6 +44,10 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %
 %     The `type' of mapping can be: 'geodesic', 'slit', or 'zipper'.
 %
+%     A note on normalization: this function normalizes the interior and
+%     exterior moebius maps so that the first vertex of the shape lies at the
+%     mapped point z=1 (both interior and exterior).
+%
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %          conformal mapping", 2006.
 
@@ -267,16 +271,21 @@ else
   m3b = eye(2);
 end
 
-m_out = m5*m4*m3b*m3a*m2*m1;
+z_1 = moebius(unzipped_out(1), m3b*m3a*m2*m1);
+m_rotate_out = [exp(-i*angle(z_1)), 0; 0, 1]; % Just rotate this point to z=1
+
+m_out = m5*m4*m_rotate_out*m3b*m3a*m2*m1;
 % This thing maps the real line to the real line...therefore normalize it to get
 % rid of imaginary (machine eps crap) stuff
-m_out = real(m_out/m_out(1,1));
+m_out = real(m_out/max(m_out(:)));
 
 a = moebius(zeta_n(2),m1);
 m7 = [abs(a)/a -abs(a); ...
       -conj(a) 1];  % map normalization point to 0
-m_in = m5*m7*m1;
-m_in = real(m_in/m_in(1,1));
+z_1 = moebius(unzipped_in(1), m7*m1);
+m_rotate_in = [exp(-i*angle(z_1)), 0; 0, 1];
+m_in = m5*m_rotate_in*m7*m1;
+m_in = real(m_in/max(m_in(:)));
 
 % Total map
 if isa(opt.z_in, 'logical') & isa(opt.w_in, 'logical')
