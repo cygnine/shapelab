@@ -109,6 +109,7 @@ if zipper
   m_initial = [(z_initial(2) - z_initial(1))*[1, -z_initial(3)]; ...
                (z_initial(2) - z_initial(3))*[1, -z_initial(1)]];
   zeta_n = csqrt(moebius(zeta_n(3:end), m_initial));
+  %zeta_n = sqrt(moebius(zeta_n(3:end), m_initial));
   zeta_n(end) = Inf; % sadly, sqrt(complex Inf) = NaN
 
   unzipped_in = [Inf; -1; 0]; % original z_1, z_2, z_3
@@ -116,7 +117,8 @@ if zipper
 else
   m_initial = [1 -z_initial(2);...
                1 -z_initial(1)];
-  zeta_n = i*csqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
+  %zeta_n = i*csqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
+  zeta_n = i*sqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
   zeta_n(end) = Inf; % sadly, sqrt(complex Inf) = NaN
 
   unzipped_in = [Inf;0]; % original z_1, z_2
