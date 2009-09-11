@@ -20,7 +20,7 @@ function[w] = negative_angle_exponential(z,varargin)
 %     the branch. For inputs not on the x-axis, this indicator is irrelevant.
 
 global handles;
-opt = handles.common.InputSchema({'cut_bias', 'alpha'}, {true,1/2}, [], varargin{:});
+opt = handles.common.input_schema({'cut_bias', 'alpha'}, {true,1/2}, [], varargin{:});
 
 if length(opt.cut_bias)==1
   if opt.cut_bias

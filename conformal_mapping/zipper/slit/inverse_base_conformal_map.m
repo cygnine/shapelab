@@ -17,7 +17,7 @@ function[w] = inverse_base_conformal_map(z,a,varargin)
 %  mapping", 2006.
 
 global handles;
-opt = handles.common.InputSchema({'point_id'}, ...
+opt = handles.common.input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
 zipup = handles.shapelab.common.slit_zipup_to_a;
 

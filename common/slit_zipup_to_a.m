@@ -16,7 +16,7 @@ function[z] = slit_zipup_to_a(w,a,varargin)
 %      mapping", 2006.
 
 global handles;
-opt = handles.common.InputSchema({'point_id'}, {zeros(size(w))}, [], varargin{:});
+opt = handles.common.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 
 interior = opt.point_id==0;
 rline = opt.point_id==1;

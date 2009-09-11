@@ -21,7 +21,7 @@ function[v,w] = base_conformal_map(z,a,varargin)
 %       mapping", 2006.
 
 global handles;
-opt = handles.common.InputSchema({'point_id'}, ...
+opt = handles.common.input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
 unzip = handles.shapelab.common.slit_unzip_from_a;
 

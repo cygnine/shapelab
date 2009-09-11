@@ -21,7 +21,7 @@ function[w]= evaluate_map(z,mapdata,varargin)
 %     conformal mapping", 2006.
 
 global handles;
-%opt = handles.common.InputSchema({'onshape'}, {false}, [], varargin{:});
+%opt = handles.common.input_schema({'onshape'}, {false}, [], varargin{:});
 fa = handles.shapelab.conformal_mapping.zipper.geodesic.base_conformal_map;
 moebius = handles.shapelab.common.moebius;
 dab = handles.shapelab.common.disc_a_to_b;

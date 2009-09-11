@@ -23,7 +23,7 @@ global handles;
 % Intermediate points: see [1]
 b = abs(a)^2/real(a);
 c = abs(a)^2/imag(a);
-opt = handles.common.InputSchema({'point_id','cut_magnitude'}, ...
+opt = handles.common.input_schema({'point_id','cut_magnitude'}, ...
       {zeros(size(z),'int8'), c}, [],varargin{:});
 moebius_inv = handles.shapelab.common.moebius_inverse;
 zipup_at_c = handles.shapelab.common.symmetric_zipup_to_ic;

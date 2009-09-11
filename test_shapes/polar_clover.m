@@ -15,7 +15,7 @@ function[z] = polar_clover(N, varargin)
 global handles;
 inputs = {'lobes', 'lobe_depth_ratio', 'node_locations', 'M', 'lobe_max_radius'};
 defaults = {4, 0.5, 'boundary', 25, 1};
-opt = handles.common.InputSchema(inputs, defaults, [], varargin{:});
+opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
 
 if strcmpi(opt.node_locations, 'boundary')
   theta = linspace(0,2*pi,N+1);

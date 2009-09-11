@@ -21,7 +21,7 @@ function[w] = positive_angle_square_root(z,varargin)
 %     deprecated soon.
 
 global handles;
-opt = handles.common.InputSchema({'cut_bias'}, {[]}, [], varargin{:});
+opt = handles.common.input_schema({'cut_bias'}, {[]}, [], varargin{:});
 
 if length(opt.cut_bias)==1
   if opt.cut_bias

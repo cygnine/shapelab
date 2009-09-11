@@ -13,7 +13,7 @@ function[z] = polar_linspace(N,M,varargin)
 global handles;
 inputs = {'r0', 'r1', 'theta0', 'theta1'};
 defaults = {0,1,0,2*pi};
-opt = handles.common.InputSchema(inputs, defaults, [], varargin{:});
+opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
 
 z = zeros([N*M 1]);
 

@@ -12,7 +12,7 @@ function[mapdata] = make_zipper_map(z,varargin)
 global handles;
 inputs = {'type', 'shape_0', 'shape_infinity', 'winding_number'};
 defaults = {'zipper', false, Inf, 1};
-opt = handles.common.InputSchema(inputs, defaults, [], varargin{:});
+opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
 
 mopt.type = opt.type;
 mopt.winding_number = opt.winding_number;

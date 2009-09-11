@@ -10,7 +10,7 @@ function[tin,tout] = normalize_fingerprint(tin,tout,varargin)
 %     Basically this function just saves typing.
 
 global handles;
-opt = handles.common.InputSchema({'norm_point'}, {1}, [], varargin{:});
+opt = handles.common.input_schema({'norm_point'}, {1}, [], varargin{:});
 
 tin = unwrap(tin);
 tout = unwrap(tout);

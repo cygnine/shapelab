@@ -1,5 +1,7 @@
 function[mapdata] = compute_map_coordinates(z_n,varargin)
-% [z_initial,a_array,zeta_n] = compute_map_coordinates(z_n,{z_in=false,w_in=false,
+% compute_map_coordinates -- Calculates a sequential conformal map
+%
+% [mapdata] = compute_map_coordinates(z_n,{z_in=false,w_in=false,
 %                 z_out=false, w_out=false, winding_number=1,
 %                 zip_magnitude=0.85, type='geodesic'})
 %
@@ -55,7 +57,7 @@ global handles;
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
           'zip_magnitude','type'};
 defaults = {false, false, Inf, Inf, 1, 0.85, 'geodesic'};
-opt = handles.common.InputSchema(inputs,defaults,[],varargin{:});
+opt = handles.common.input_schema(inputs,defaults,[],varargin{:});
 shapelab = handles.shapelab;
 zip = shapelab.conformal_mapping.zipper;
 moebius = shapelab.common.moebius;
@@ -136,6 +138,12 @@ end
 
 a_array = zeros([N_teeth+1,1]);
 c_array = zeros([N_teeth+1,1]); % Only needed for zipper, really
+
+% Some moebius transforms to normalize things
+m1 = [-1, i; ...
+       1, i];  % to unit circle
+m5 = [i, -i; ...
+      -1, -1]; % invert m1
 %%
 
 %% Looping over teeth
@@ -163,6 +171,22 @@ for q = 1:N_teeth
     % we know:
     unzipped_in(end) = 0; unzipped_out(end) = 0;
   else
+    % First apply a map that pushes z_in to i:
+    a = moebius(zeta_n(end-2), m1);
+    if abs(a)>1e-12
+      m3 = [abs(a)/a -abs(a); ...
+        -conj(a) 1];  % map a to 0
+      else
+      m3 = eye(2);
+    end
+    mfull = m5*m3*m1;
+    mfull = real(mfull/mfull(1,1));
+
+    % Map all the stuff:
+    zeta_n = moebius(zeta_n,mfull);
+    unzipped_in = moebius(unzipped_in, mfull);
+    unzipped_out = moebius(unzipped_out, mfull);
+
     % The next map is defined by the parameter:
     a_array(q) = zeta_n(1);
 

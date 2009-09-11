@@ -16,7 +16,7 @@ global handles;
 welding = handles.shapelab.welding;
 inputs = {'theta_int', 'theta_ext'};
 defaults = {[], []};
-opt = handles.common.InputSchema(inputs, defaults, [], varargin{:});
+opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
 
 s_int = size(opt.theta_int);
 s_ext = size(opt.theta_ext);

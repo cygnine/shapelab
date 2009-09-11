@@ -17,7 +17,7 @@ function[z]= evaluate_inverse_map(w,mapdata,varargin)
 %          conformal mapping", 2006.
 
 global handles;
-opt = handles.common.InputSchema({'point_id'}, {zeros(size(w))}, [], varargin{:});
+opt = handles.common.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 shapelab = handles.shapelab;
 zip = shapelab.conformal_mapping.zipper;
 switch lower(mapdata.type)

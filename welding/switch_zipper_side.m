@@ -15,7 +15,7 @@ function[z] = switch_zipper_side(z,mapdata,varargin)
 %     that you want to map onto the interior.
 
 global handles;
-opt = handles.common.InputSchema({'point_id'}, {ones(size(z))}, [], varargin{:});
+opt = handles.common.input_schema({'point_id'}, {ones(size(z))}, [], varargin{:});
 shapelab = handles.shapelab;
 zip = shapelab.conformal_mapping.zipper;
 

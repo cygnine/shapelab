@@ -20,9 +20,10 @@ function[v,w] = slit_unzip_from_a(z,a,varargin)
 %     TODO: currently using bisection on 2...get Newton's method to converge
 
 global handles;
-opt = handles.common.InputSchema({'point_id'}, {zeros(size(z))}, [], varargin{:});
+opt = handles.common.input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
 newton = handles.common.rootfind.newton_raphson;
 bisection = handles.common.rootfind.bisection;
+cpow = handles.shapelab.common.positive_angle_exponential;
 
 interior = opt.point_id==0;
 gamma = opt.point_id==1;
@@ -50,45 +51,59 @@ if any(interior)
   v0 = z + 2*p-1 + p*q./(2*z) + ...
        (1-2*p)*p*q./(3*z.^2);
 
-  % Radial separation between Newton behaviors
-  %r_critical = 100;
-
-  % For points "close" to 0, we'll use regular unscaled Newton
-  %f = @(x) (x-p).^p.*(x+q).^q;
-  %df = @(x) p*((x+q)./(x-p)).^q + q*((x-p)./(x+q)).^p;
-  %flags = (abs(z)<=r_critical) & interior;
-  %if any(flags)
-  %  [v(flags),flag] = newton(v0(flags),f,df,'F',z(flags)/C);
-  %  if flag==1
-  %    error('Newton''s methods didn''t converge');
-  %  end
-  %  w(flags) = v(flags);
-  %end
-
-  % For points "far" from 0, we'll use the (z/w) method
-  % Rewrite in (z/w) form: sketchy as hell
-  %flags = (abs(z)>r_critical) & interior;
-  %fnorm = max(z(flags));
-  %f = @(x) (x-p./fnorm).^p.*(x+q./fnorm).^q;
-  %df = @(x) p*((x+q./fnorm)./(x-p./fnorm)).^q + q*((x-p./fnorm)./(x+q./fnorm)).^p;
-  %if any(flags)
-  %  [v(flags),flag] = newton(v0(flags)/fnorm,f,df,'F',z(flags)/(C*fnorm));
-  %  if flag==1
-  %    error('Newton''s methods didn''t converge');
-  %  end
-  %  v(flags) = fnorm*v(flags);
-  %  w(flags) = v(flags);
-  %end
-
-  % Normalize all interior points...no funny opening-up business that Marshall does
-  fnorm = z(interior)/C;
+  % Points that are "far": no funny opening-up
+  interior_infinity = interior & abs(z)>abs(9/8*a);
+  fnorm = z(interior_infinity)/C;
   f = @(x) (x-p./fnorm).^p.*(x+q./fnorm).^q;
   df = @(x) p*((x+q./fnorm)./(x-p./fnorm)).^q + q*((x-p./fnorm)./(x+q./fnorm)).^p;
-  [v(interior),flag] = newton(v0(interior)./(fnorm), f, df, 'F', ones(size(z(interior))),'fx_tol',0,'x_tol',0,'maxiter',20);
-  if any(abs(f(v(interior)) - 1)>1e-8)
-    error('Newton''s method didn''t converge');
+  %f = @(x) cpow(x-p./fnorm, p).*cpow(x+q./fnorm, q);
+  %df = @(x) p*cpow((x+q./fnorm)./(x-p./fnorm), q) + q*cpow((x-p./fnorm)./(x+q./fnorm), p);
+  if any(interior_infinity)
+    [v(interior_infinity),flag] = newton(v0(interior_infinity)./(fnorm), f, df, ...
+      'F', ones(size(z(interior_infinity))),'fx_tol',0,'x_tol',0,'maxiter',30);
+    if any(abs(f(v(interior_infinity)) - 1)>1e-8)
+      error('Newton''s method didn''t converge');
+    end
+    v(interior_infinity) = v(interior_infinity).*fnorm;
   end
-  v(interior) = v(interior).*fnorm;
+
+  % Points that are "near", and "closer to 0"
+  interior_0 = interior & (angle(z)/pi < p) & not(interior_infinity);
+  % "Open up" this sector
+  fnorm = z(interior_0);
+  f = @(x) (fnorm/C).^(-1/p).*(x-p).*(x+q).^(q/p);
+  df = @(x) (fnorm/C).^(-1/p).*(x+q).^(q/p) + (q/p)*(x-p).*(x+q).^((q-p)/p);
+  %f = @(x) (x-p./fnorm).*cpow(x+q./fnorm, q/p);
+  %df = @(x) cpow(x+q./fnorm, q/p) + q/p*(x-p./fnorm).*cpow(x+q./fnorm, (q-p)/p);
+  if any(interior_0)
+    z0 = fnorm + 2*p-1;
+    [v(interior_0), flag] = newton(z0, f, df, ...
+      'F', ones(size(fnorm)), 'fx_tol', 0, 'x_tol', 0, 'maxiter', 70);
+    
+    if any(abs(f(v(interior_0)) - 1)>1e-8)
+      error('Newton''s method didn''t converge');
+    end
+    %v(interior_0) = v(interior_0).*fnorm;
+  end
+
+  interior_pi = interior & (angle(z)/pi > p) & not(interior_infinity);
+  % "Open up" this sector
+  fnorm = z(interior_pi);
+  %f = @(x) (x-p./fnorm).^(p/q).*(x+q./fnorm);
+  %df = @(x) (x-p./fnorm).^(p/q) + p/q*(x-p./fnorm).^((p-q)/q).*(x+q./fnorm);
+  f = @(x) (fnorm/C).^(-1/q).*(x-p).^(p/q).*(x+q);
+  df = @(x) (fnorm/C).^(-1/q).*((x-p).^(p/q) + (x+q).*(p/q).*(x-p).^(p/q));
+  if any(interior_pi)
+    %z0 = fnorm + 2*p-1;
+    %z0 = v0(interior_pi);
+    z0 = fnorm;
+    [v(interior_pi), flag] = newton(z0, f, df, ...
+      'F', ones(size(fnorm)), 'fx_tol', 0, 'x_tol', 0, 'maxiter', 70);
+
+    if any(abs(f(v(interior_pi)) - 1)>1e-8)
+      error('Newton''s method didn''t converge');
+    end
+  end
 end
 
 % If we're on gamma, then the solution on the real line satisfies (x-p)<0 and
@@ -158,4 +173,8 @@ if any(boundary)
     w(boundary) = v(boundary);
   end
 
+end
+
+if any(imag(v)<0)
+  error('Stuff''s in the lower half-plane');
 end

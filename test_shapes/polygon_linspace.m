@@ -12,7 +12,7 @@ function z = polygon_range(v,varargin)
 %     formed in same order as the points are given.
 
 global handles;
-opt = handles.common.InputSchema({'step_size', 'N'}, {false, 100}, [], varargin{:});
+opt = handles.common.input_schema({'step_size', 'N'}, {false, 100}, [], varargin{:});
 
 v = v(:);
 Nv = length(v);

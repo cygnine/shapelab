@@ -35,7 +35,7 @@ fprintf('Computing slit map....\n');
 slit_map = welding.make_zipper_map(z,map_opt);
 
 map_opt.type = 'zipper_weld';
-%fprintf('Computing zipper map....\n');
+fprintf('Computing zipper map....\n');
 %zip_map = welding.make_zipper_map(z,map_opt);
 
 w_fine = shapelab.common.polar_linspace(1,100*N,'r0', 1, 'r1', 1);
