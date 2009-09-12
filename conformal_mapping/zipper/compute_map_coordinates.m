@@ -55,8 +55,8 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 
 global handles;
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
-          'zip_magnitude','type'};
-defaults = {false, false, Inf, Inf, 1, 0.85, 'geodesic'};
+          'zip_magnitude','type','visualize'};
+defaults = {false, false, Inf, Inf, 1, 0.85, 'geodesic',false};
 opt = handles.common.input_schema(inputs,defaults,[],varargin{:});
 shapelab = handles.shapelab;
 zip = shapelab.conformal_mapping.zipper;
@@ -127,6 +127,8 @@ else
   unzipped_out = [Inf;0];
 end
 %%
+
+visualize();
 
 %% Initialization for looping over teeth
 fa_opt.cut_magnitude = opt.zip_magnitude;
@@ -341,3 +343,20 @@ unzipped_out = moebius(unzipped_out, m);
  deal(a_array, opt.zip_magnitude,opt.z_in, opt.w_in, opt.z_out, opt.w_out, ...
       unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial,...
       opt.type, c_array, N_teeth);
+
+  function visualize()
+    z_plot = moebius(zeta_n(1:end-3),moebius_plot);
+    zin_plot = moebius(unzipped_in(1:end-3),moebius_plot);
+    zout_plot = moebius(unzipped_out(1:end-3),moebius_plot);
+    set(shape_plot, 'xdata', real(z_plot), 'ydata', imag(z_plot));
+    set(interior_plot, 'xdata', real(zin_plot), 'ydata', imag(zin_plot));
+    set(exterior_plot, 'xdata', real(zout_plot), 'ydata', imag(zout_plot));
+    drawnow;
+  end
+
+  function initialize_visualization()
+
+    shape_plot = plot(moebius(zeta_n, moebius_plot), 'b.-');
+    zin_plot = plot(
+  end
+end
