@@ -29,6 +29,7 @@ opt = handles.common.input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:
 newton = handles.common.rootfind.newton_raphson;
 bisection = handles.common.rootfind.bisection;
 cpow = handles.shapelab.common.positive_angle_exponential;
+common = handles.shapelab.common;
 
 interior = opt.point_id==0;
 gamma = opt.point_id==1;
@@ -66,11 +67,10 @@ if any(interior)
 
   % Initial guess for small angles:
   v0 = zeros(size(z));
-  z(small_angles) = z(small_angles).^(0.5/p);
-  z(large_angles) = ((z(large_angles)*exp(-i*pi*p)).^(0.5/q)).*exp(i*pi/2);
-  v0(interior) = slit.symmetric_unzip_from_ic(z,1);
-  v0(small_angles) = v0(small_angles).^(p/0.5);
-  v0(large_angle) = ((v0(large_angles).*exp(-i*pi/2)).^(q/0.5)).*exp(i*pi*p);
+  temp_small = z(small_angles).^(0.5/p);
+  temp_large = ((z(large_angles)*exp(-i*pi*p)).^(0.5/q)).*exp(i*pi/2);
+  v0(small_angles) = p*common.symmetric_unzip_from_ic(temp_small,1);
+  v0(large_angles) = q*common.symmetric_unzip_from_ic(temp_large,1);
 
   % Newton iteration. Initial guess from Marshall:
   %v0 = z + 2*p-1 + p*q./(2*z) + ...
@@ -79,16 +79,12 @@ if any(interior)
   % Points that are "far": no funny opening-up
   % If the default doesn't work, maybe go the Marshall way and divide by fnorm
   % so that f(w) = 1?
-  %fnorm = z(interior)/C;
-  fnorm = ones(size(z(interior)));
   f = @(x) C*(x-p).^p.*(x+q).^q;
   df = @(x) C*p*(x-p).^(p-1).*(x+q).^q + C*q*(x-p).^p.*(x+q).^(q-1);
-  %f = @(x) (x-p./fnorm).^p.*(x+q./fnorm).^q;
-  %df = @(x) p*((x+q./fnorm)./(x-p./fnorm)).^q + q*((x-p./fnorm)./(x+q./fnorm)).^p;
   if any(interior)
     [v(interior),flag] = newton(v0(interior), f, df, ...
-      'F', z(interior),'fx_tol',0,'x_tol',0,'maxiter',30);
-    if any(abs(f(v(interior)) - z(interior))>1e-8)
+      'F', z(interior),'fx_tol',0,'x_tol',0,'maxiter',50);
+    if any(abs(f(v(interior)) - z(interior))>1e-6)
       error('Newton''s method didn''t converge');
     end
     %v(interior) = v(interior).*fnorm;
