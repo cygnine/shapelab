@@ -69,6 +69,11 @@ if any(interior)
   v0 = zeros(size(z));
   temp_small = z(small_angles).^(0.5/p);
   temp_large = ((z(large_angles)*exp(-i*pi*p)).^(0.5/q)).*exp(i*pi/2);
+  % Sometimes things get eps into the lower half-plane
+  flags = imag(temp_small)<0;
+  temp_small(flags) = conj(temp_small(flags));
+  flags = imag(temp_large)<0;
+  temp_large(flags) = conj(temp_large(flags));
   v0(small_angles) = p*common.symmetric_unzip_from_ic(temp_small,1);
   v0(large_angles) = q*common.symmetric_unzip_from_ic(temp_large,1);
 
@@ -83,11 +88,15 @@ if any(interior)
   df = @(x) C*p*(x-p).^(p-1).*(x+q).^q + C*q*(x-p).^p.*(x+q).^(q-1);
   if any(interior)
     [v(interior),flag] = newton(v0(interior), f, df, ...
-      'F', z(interior),'fx_tol',0,'x_tol',0,'maxiter',50);
+      'F', z(interior),'fx_tol',1e-8,'x_tol',0,'maxiter',50);
     if any(abs(f(v(interior)) - z(interior))>1e-6)
       error('Newton''s method didn''t converge');
     end
-    %v(interior) = v(interior).*fnorm;
+    % *sigh*, weird fix: sometimes things get pushed eps into the lower
+    % half-plane. Can't put them on the real line because that would screw
+    % things up down the line...so push them eps into the upper half-plane.
+    flags = interior & imag(v)<0;
+    v(flags) = real(v(flags)) - i*imag(v(flags));
   end
 end
 

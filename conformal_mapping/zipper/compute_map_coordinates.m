@@ -128,7 +128,7 @@ else
 end
 %%
 
-visualize();
+%visualize();
 
 %% Initialization for looping over teeth
 fa_opt.cut_magnitude = opt.zip_magnitude;
@@ -185,9 +185,9 @@ for q = 1:N_teeth
     mfull = real(mfull/mfull(1,1));
 
     % Map all the stuff:
-    zeta_n = moebius(zeta_n,mfull);
-    unzipped_in = moebius(unzipped_in, mfull);
-    unzipped_out = moebius(unzipped_out, mfull);
+    %zeta_n = moebius(zeta_n,mfull);
+    %unzipped_in = moebius(unzipped_in, mfull);
+    %unzipped_out = moebius(unzipped_out, mfull);
 
     % The next map is defined by the parameter:
     a_array(q) = zeta_n(1);
@@ -344,19 +344,19 @@ unzipped_out = moebius(unzipped_out, m);
       unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial,...
       opt.type, c_array, N_teeth);
 
-  function visualize()
-    z_plot = moebius(zeta_n(1:end-3),moebius_plot);
-    zin_plot = moebius(unzipped_in(1:end-3),moebius_plot);
-    zout_plot = moebius(unzipped_out(1:end-3),moebius_plot);
-    set(shape_plot, 'xdata', real(z_plot), 'ydata', imag(z_plot));
-    set(interior_plot, 'xdata', real(zin_plot), 'ydata', imag(zin_plot));
-    set(exterior_plot, 'xdata', real(zout_plot), 'ydata', imag(zout_plot));
-    drawnow;
-  end
+  %function visualize()
+  %  z_plot = moebius(zeta_n(1:end-3),moebius_plot);
+  %  zin_plot = moebius(unzipped_in(1:end-3),moebius_plot);
+  %  zout_plot = moebius(unzipped_out(1:end-3),moebius_plot);
+  %  set(shape_plot, 'xdata', real(z_plot), 'ydata', imag(z_plot));
+  %  set(interior_plot, 'xdata', real(zin_plot), 'ydata', imag(zin_plot));
+  %  set(exterior_plot, 'xdata', real(zout_plot), 'ydata', imag(zout_plot));
+  %  drawnow;
+  %end
 
-  function initialize_visualization()
+  %function initialize_visualization()
 
-    shape_plot = plot(moebius(zeta_n, moebius_plot), 'b.-');
-    zin_plot = plot(
-  end
+    %shape_plot = plot(moebius(zeta_n, moebius_plot), 'b.-');
+    %zin_plot = plot(
+  %end
 end

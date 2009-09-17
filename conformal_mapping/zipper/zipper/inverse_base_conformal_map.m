@@ -31,6 +31,7 @@ delta_real = real(a) - real(c);
 if abs(delta_real)<1e-14
   d = a;  % Straight line segment...we *could* actually use geodesic here since
           % it's the same conformal map
+  m = eye(2);
 else
   b = (imag(c)*abs(a)^2 - imag(a)*abs(c)^2)/(real(a)*imag(c) - real(c)*imag(a));
   m = [1 0; -1/b 1];

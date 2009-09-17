@@ -24,7 +24,8 @@ function[v,w] = base_conformal_map(z,c,a,varargin)
 global handles;
 opt = handles.common.input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
-unzip = handles.shapelab.common.slit_unzip_from_a;
+%unzip = handles.shapelab.common.slit_unzip_from_a;
+unzip = handles.shapelab.conformal_mapping.zipper.slit.slit_unzip_from_a;
 moebius = handles.shapelab.common.moebius;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
@@ -34,6 +35,7 @@ delta_real = real(a) - real(c);
 if abs(delta_real)<1e-14
   d = a;  % Straight line segment...we *could* actually use geodesic here since
           % it's the same conformal map
+  m = eye(2);
 else
   b = (imag(c)*abs(a)^2 - imag(a)*abs(c)^2)/(real(a)*imag(c) - real(c)*imag(a));
   m = [1 0; -1/b 1];

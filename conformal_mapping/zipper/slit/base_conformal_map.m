@@ -23,7 +23,8 @@ function[v,w] = base_conformal_map(z,a,varargin)
 global handles;
 opt = handles.common.input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
-unzip = handles.shapelab.common.slit_unzip_from_a;
+%unzip = handles.shapelab.common.slit_unzip_from_a;
+unzip = handles.shapelab.conformal_mapping.zipper.slit.slit_unzip_from_a;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 
