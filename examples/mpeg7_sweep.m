@@ -19,7 +19,7 @@ clover = shapelab.test_shapes.polar_clover;
 fprint_norm = welding.normalize_fingerprint;
 
 load mpeg7_contours;
-%mpeg7_contour = mpeg7_contour(1:10);
+%mpeg7_contour = mpeg7_contour(101:500);
 
 N_shapes = length(mpeg7_contour);
 N = 100; % Number of data points for each shape
@@ -34,15 +34,23 @@ zip_map_errors = cell(0);
 slit_calc = false;
 zip_calc = false;
 
-
-for q = 1:N_shapes
+for q = 272:N_shapes
   fprintf('Computing shape %d\n', q);
   shape = mpeg7_contour{q};
   z = shape(round(linspace(1,length(shape),N+1)));
   z(end) = [];
+  % Remove common nodes
+  z = shapelab.common.shape_preprocessing(z);
+
+  % If odd # of nodes, tack shape(2) into place -- in practice, this clause is
+  % only needed for q = 1300
+  if mod(length(z),2)==1
+    z = [z(1); shape(2); z(2:end)];
+  end
 
   map_opt.type = 'geodesic';
   map_opt.shape_0 = mean(shape);
+  map_opt.visualize = false;
   fprintf('...geodesic...');
   geo_map = welding.make_zipper_map(z,map_opt);
 
@@ -53,7 +61,7 @@ for q = 1:N_shapes
     slit_calc = true;
   catch
     fprintf('...fail...');
-    slit_map_errors(end+1) = q;
+    slit_map_errors{end+1} = q;
   end
 
   map_opt.type = 'zipper_weld';
@@ -63,7 +71,7 @@ for q = 1:N_shapes
     zip_calc = true;
   catch
     fprintf('...FAIL...');
-    zip_map_errors(end+1) = q;
+    zip_map_errors{end+1} = q;
   end
   fprintf('\n');
 

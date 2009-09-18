@@ -88,7 +88,7 @@ if any(interior)
   df = @(x) C*p*(x-p).^(p-1).*(x+q).^q + C*q*(x-p).^p.*(x+q).^(q-1);
   if any(interior)
     [v(interior),flag] = newton(v0(interior), f, df, ...
-      'F', z(interior),'fx_tol',1e-8,'x_tol',0,'maxiter',50);
+      'F', z(interior),'fx_tol',1e-8,'x_tol',0,'maxiter',100);
     if any(abs(f(v(interior)) - z(interior))>1e-6)
       error('Newton''s method didn''t converge');
     end
@@ -163,3 +163,7 @@ end
 if any(imag(v)<0)
   error('Stuff''s in the lower half-plane');
 end
+
+%temp = mean([p,q]);
+%v = v*temp;
+%w = w*temp;

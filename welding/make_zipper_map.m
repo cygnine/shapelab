@@ -10,8 +10,8 @@ function[mapdata] = make_zipper_map(z,varargin)
 %     used in the computations. 
 
 global handles;
-inputs = {'type', 'shape_0', 'shape_infinity', 'winding_number'};
-defaults = {'zipper', false, Inf, 1};
+inputs = {'type', 'shape_0', 'shape_infinity', 'winding_number','visualize'};
+defaults = {'zipper', false, Inf, 1,0};
 opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
 
 mopt.type = opt.type;
@@ -23,5 +23,6 @@ end
 
 mopt.z_out = opt.shape_infinity;
 mopt.w_out = Inf;
+mopt.visualize = opt.visualize;
 
 mapdata = handles.shapelab.conformal_mapping.zipper.compute_map_coordinates(z, mopt);

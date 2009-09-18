@@ -63,6 +63,8 @@ zip = shapelab.conformal_mapping.zipper;
 moebius = shapelab.common.moebius;
 csqrt = handles.shapelab.common.positive_angle_square_root;
 moebius_inv = shapelab.common.moebius_inverse;
+moebius_plot = [-1, i;...
+                1, i];  % Just a map from half plane to unit circle.
 switch lower(opt.type)
 case 'geodesic'
   fa = zip.geodesic.base_conformal_map;
@@ -128,7 +130,8 @@ else
 end
 %%
 
-%visualize();
+[shape_plot,zin_plot,zout_plot] = initialize_visualization();
+visualize(); 
 
 %% Initialization for looping over teeth
 fa_opt.cut_magnitude = opt.zip_magnitude;
@@ -151,6 +154,22 @@ m5 = [i, -i; ...
 %% Looping over teeth
 for q = 1:N_teeth
   if zipper
+    %% First apply a map that pushes z_in to i:
+    %a = moebius(zeta_n(end-1), m1);
+    %if abs(a)>1e-12
+    %  m3 = [abs(a)/a -abs(a); ...
+    %    -conj(a) 1];  % map a to 0
+    %  else
+    %  m3 = eye(2);
+    %end
+    %mfull = m5*m3*m1;
+    %mfull = real(mfull/mfull(1,1));
+
+    % Map all the stuff:
+    %zeta_n = moebius(zeta_n,mfull);
+    %unzipped_in = moebius(unzipped_in, mfull);
+    %unzipped_out = moebius(unzipped_out, mfull);
+
     % Need next two points to define the map:
     c_array(q) = zeta_n(1);
     a_array(q) = zeta_n(2);
@@ -173,21 +192,7 @@ for q = 1:N_teeth
     % we know:
     unzipped_in(end) = 0; unzipped_out(end) = 0;
   else
-    % First apply a map that pushes z_in to i:
-    a = moebius(zeta_n(end-2), m1);
-    if abs(a)>1e-12
-      m3 = [abs(a)/a -abs(a); ...
-        -conj(a) 1];  % map a to 0
-      else
-      m3 = eye(2);
-    end
-    mfull = m5*m3*m1;
-    mfull = real(mfull/mfull(1,1));
 
-    % Map all the stuff:
-    %zeta_n = moebius(zeta_n,mfull);
-    %unzipped_in = moebius(unzipped_in, mfull);
-    %unzipped_out = moebius(unzipped_out, mfull);
 
     % The next map is defined by the parameter:
     a_array(q) = zeta_n(1);
@@ -208,6 +213,8 @@ for q = 1:N_teeth
     unzipped_in(end+1) = 0;
     unzipped_out(end+1) = 0;
   end
+  %abs(moebius(zeta_n(end-3:end),moebius_plot)) - 1
+  visualize();  
 end
 %%
 
@@ -344,19 +351,36 @@ unzipped_out = moebius(unzipped_out, m);
       unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial,...
       opt.type, c_array, N_teeth);
 
-  %function visualize()
-  %  z_plot = moebius(zeta_n(1:end-3),moebius_plot);
-  %  zin_plot = moebius(unzipped_in(1:end-3),moebius_plot);
-  %  zout_plot = moebius(unzipped_out(1:end-3),moebius_plot);
-  %  set(shape_plot, 'xdata', real(z_plot), 'ydata', imag(z_plot));
-  %  set(interior_plot, 'xdata', real(zin_plot), 'ydata', imag(zin_plot));
-  %  set(exterior_plot, 'xdata', real(zout_plot), 'ydata', imag(zout_plot));
-  %  drawnow;
-  %end
+   function visualize()
+    if opt.visualize
+      z_data = moebius([0; zeta_n(1:end-3)],moebius_plot);
+      zin_data = moebius(unzipped_in,moebius_plot);
+      zout_data = moebius(unzipped_out,moebius_plot);
+      set(shape_plot, 'xdata', real(z_data), 'ydata', imag(z_data));
+      set(zin_plot, 'xdata', real(zin_data), 'ydata', imag(zin_data));
+      set(zout_plot, 'xdata', real(zout_data), 'ydata', imag(zout_data));
+      drawnow;
+    end
+  end 
 
-  %function initialize_visualization()
+  function[shape_plot,zin_plot,zout_plot]=initialize_visualization()
+    if opt.visualize
+      figure(); 
+      theta = linspace(0,2*pi,200);
+      plot(exp(i*theta), 'b--');
+      axis square;
+      axis off;
+      hold on;
+      shape_plot = plot(moebius(zeta_n, moebius_plot), 'k.-');
+      temp = moebius(unzipped_in,moebius_plot);
+      zin_plot = plot(real(temp), imag(temp), 'r.');
+      temp = moebius(unzipped_out, moebius_plot);
+      zout_plot = plot(real(temp), imag(temp), 'b.');
+    else
+      shape_plot = 0;
+      zin_plot = 0;
+      zout_plot = 0;
+    end
+  end
 
-    %shape_plot = plot(moebius(zeta_n, moebius_plot), 'b.-');
-    %zin_plot = plot(
-  %end
 end
