@@ -1,13 +1,16 @@
-function[z] = shape_preprocessing(z,varargin)
+function[z,zipable] = shape_preprocessing(z,varargin)
 % shape_preprocessing -- operations to prepare a shape for zipper
 %
-% [z] = shape_preprocessing(z)
+% [z,zipable] = shape_preprocessing(z)
 %
 %     A shape with vertices z may have the following characteristics, making it
 %     unsuitable for zipper:
 %       - Nonunique nodes
-%       - Intersecting nodes (in this case, nothing is fixed, but a warning is
+%       - Intersecting segments (in this case, nothing is fixed, but a warning is
 %         issued)
+%
+%     The boolean output zipable returns false if a condition is violated (e.g.
+%     intersecting segments).
 
 % Make nodes unique:
 [garbage, inds, garbage] = unique(z);
@@ -20,6 +23,7 @@ tol = 1e-8;
 % Pairwise search over all line segments for intersection. This is wasteful, but
 % *shrug*.
 fail = false;
+zipable = true;
 for q = 1:N
   p1 = ztemp(1);
   p2 = ztemp(2);
@@ -42,7 +46,7 @@ for q = 1:N
 
   if fail
     warning('The given shape has intersecting segments...the approximation will not work');
-    adsf
+    zipable = false;
     break;
   end
 
