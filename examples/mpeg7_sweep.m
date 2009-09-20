@@ -41,7 +41,7 @@ for q = 1:N_shapes
   z(end) = [];
   % Remove common nodes
   [z,zipable] = shapelab.common.shape_preprocessing(z);
-  if not(zipable)
+  if not(zipable) % Then add a few points and try again
     z = shape(round(linspace(1,length(shape),N+11)));
     z(end) = [];
     [z,zipable] = shapelab.common.shape_preprocessing(z);
