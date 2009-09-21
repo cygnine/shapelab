@@ -109,7 +109,9 @@ for q = 1:N_shapes
       plot(z,'b.'); hold on; plot(z_zip_fine, 'r'); title('Zipper');
     end
 
-    figsave(fhandle,{num2str(q)}, 'mpeg7_data');
+    % The following line saves the figure data; you should only uncomment it if
+    % you want ~1MB of data per shape to be generated as jpg,eps,pdf, and fig.
+    %figsave(fhandle,{num2str(q)}, 'mpeg7_data');
 
     geo_error = 0*shape;
     slit_error = 0*shape;
