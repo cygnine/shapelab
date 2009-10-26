@@ -20,11 +20,11 @@ function[v,w] = base_conformal_map(z,a,varargin)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %       mapping", 2006.
 
-global handles;
-opt = handles.common.input_schema({'point_id'}, ...
+global packages;
+opt = packages.labtools.input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
-%unzip = handles.shapelab.common.slit_unzip_from_a;
-unzip = handles.shapelab.conformal_mapping.zipper.slit.slit_unzip_from_a;
+%unzip = packages.shapelab.common.slit_unzip_from_a;
+unzip = packages.shapelab.conformal_mapping.zipper.slit.slit_unzip_from_a;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 

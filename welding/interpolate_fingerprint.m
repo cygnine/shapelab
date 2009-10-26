@@ -12,11 +12,11 @@ function[varargout] = interpolate_fingerprint(mapdata,varargin)
 %     This function doesn't do any 'unwrapping' of angle values; it just spits
 %     out whatever Matlab's angle function gives it. 
 
-global handles;
-welding = handles.shapelab.welding;
+global packages;
+welding = packages.shapelab.welding;
 inputs = {'theta_int', 'theta_ext'};
 defaults = {[], []};
-opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
+opt = packages.labtools.input_schema(inputs, defaults, [], varargin{:});
 
 s_int = size(opt.theta_int);
 s_ext = size(opt.theta_ext);

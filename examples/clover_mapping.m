@@ -3,13 +3,13 @@
 clear
 close all;
 
-global handles;
-explot = handles.common.explot;  % Some common functions
-ltex = handles.common.typelatex;
+global packages;
+explot = packages.labtools.explot;  % Some common functions
+ltex = packages.labtools.typelatex;
 
-shapelab = handles.shapelab;  % shapelab stuff
+shapelab = packages.shapelab;  % shapelab stuff
 zipper = shapelab.conformal_mapping.zipper;
-welding = handles.shapelab.welding;
+welding = packages.shapelab.welding;
 clover = shapelab.test_shapes.polar_clover;
 fprint_norm = welding.normalize_fingerprint;
 

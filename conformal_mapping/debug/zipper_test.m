@@ -1,8 +1,8 @@
-global handles;
-clover = handles.shapelab.test_shapes.polar_clover;
-plinspace = handles.shapelab.common.polar_linspace;
-gd = handles.shapelab.conformal_mapping.zipper;
-weld = handles.shapelab.welding;
+global packages;
+clover = packages.shapelab.test_shapes.polar_clover;
+plinspace = packages.shapelab.common.polar_linspace;
+gd = packages.shapelab.conformal_mapping.zipper;
+weld = packages.shapelab.welding;
 
 N = 100;
 opt.lobes = 4;

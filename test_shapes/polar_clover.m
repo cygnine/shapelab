@@ -12,10 +12,10 @@ function[z] = polar_clover(N, varargin)
 %     lobe_max_radius are used. lobe_max_radius determines the maximal value of
 %     |z| this function returns. 
 
-global handles;
+global packages;
 inputs = {'lobes', 'lobe_depth_ratio', 'node_locations', 'M', 'lobe_max_radius'};
 defaults = {4, 0.5, 'boundary', 25, 1};
-opt = handles.common.input_schema(inputs, defaults, [], varargin{:});
+opt = packages.labtools.input_schema(inputs, defaults, [], varargin{:});
 
 if strcmpi(opt.node_locations, 'boundary')
   theta = linspace(0,2*pi,N+1);
@@ -24,13 +24,13 @@ if strcmpi(opt.node_locations, 'boundary')
 elseif strcmpi(opt.node_locations, 'interior')
   linopt.r0 = 0;
   linopt.r1 = (opt.M-1)/opt.M;
-  z = handles.shapelab.common.polar_linspace(opt.M,N,linopt);
+  z = packages.shapelab.common.polar_linspace(opt.M,N,linopt);
   theta = angle(z);
   r = abs(z);
 elseif strcmpi(opt.node_locations, 'exterior')
   linopt.r1 = 2;
   linopt.r0 = 1+1/opt.M;
-  z = handles.shapelab.common.polar_linspace(opt.M,N,linopt);
+  z = packages.shapelab.common.polar_linspace(opt.M,N,linopt);
   theta = angle(z);
   r = abs(z);
 end

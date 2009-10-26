@@ -15,8 +15,8 @@ function[z] = slit_zipup_to_a(w,a,varargin)
 % [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %      mapping", 2006.
 
-global handles;
-opt = handles.common.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
+global packages;
+opt = packages.labtools.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 
 interior = opt.point_id==0;
 rline = opt.point_id==1;

@@ -16,9 +16,9 @@ function[z]= evaluate_inverse_map(w,mapdata,varargin)
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %          conformal mapping", 2006.
 
-global handles;
-opt = handles.common.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
-shapelab = handles.shapelab;
+global packages;
+opt = packages.labtools.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
+shapelab = packages.shapelab;
 zip = shapelab.conformal_mapping.zipper;
 switch lower(mapdata.type)
 case 'geodesic'

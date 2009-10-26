@@ -1,6 +1,6 @@
-global handles;
-gd = handles.shapelab.conformal_mapping.zipper;
-weld = handles.shapelab.welding;
+global packages;
+gd = packages.shapelab.conformal_mapping.zipper;
+weld = packages.shapelab.welding;
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 
@@ -54,8 +54,8 @@ wout_image = gd.evaluate_inverse_map(wout,mapdata);
 %tout = gd.evaluate_map(z,mapout);
 
 % Debugging stuff
-moebius = handles.shapelab.common.moebius;
-fa = handles.shapelab.conformal_mapping.geodesic.base_conformal_map;
+moebius = packages.shapelab.common.moebius;
+fa = packages.shapelab.conformal_mapping.geodesic.base_conformal_map;
 opt.z_in = 0;
 opt.z_out = 0;
 opt.winding_number = 1;

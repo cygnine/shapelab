@@ -24,12 +24,12 @@ function[v,w] = slit_unzip_from_a(z,a,varargin)
 %
 %     TODO: currently using bisection on 2...get Newton's method to converge
 
-global handles;
-opt = handles.common.input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
-newton = handles.common.rootfind.newton_raphson;
-bisection = handles.common.rootfind.bisection;
-cpow = handles.shapelab.common.positive_angle_exponential;
-common = handles.shapelab.common;
+global packages;
+opt = packages.labtools.input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
+newton = packages.labtools.rootfind.newton_raphson;
+bisection = packages.labtools.rootfind.bisection;
+cpow = packages.shapelab.common.positive_angle_exponential;
+common = packages.shapelab.common;
 
 interior = opt.point_id==0;
 gamma = opt.point_id==1;

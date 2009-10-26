@@ -23,14 +23,14 @@ function[v,w] = base_conformal_map(z,a,varargin)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %       mapping", 2006.
 
-global handles;
+global packages;
 % Intermediate points: see [1]
 b = abs(a)^2/real(a);
 c = abs(a)^2/imag(a);
-opt = handles.common.input_schema({'point_id','cut_magnitude'}, ...
+opt = packages.labtools.input_schema({'point_id','cut_magnitude'}, ...
       {zeros(size(z),'int8'), c}, [],varargin{:});
-moebius = handles.shapelab.common.moebius;
-unzip_at_c = handles.shapelab.common.symmetric_unzip_from_ic;
+moebius = packages.shapelab.common.moebius;
+unzip_at_c = packages.shapelab.common.symmetric_unzip_from_ic;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 

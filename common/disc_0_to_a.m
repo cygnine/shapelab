@@ -14,8 +14,8 @@ elseif isinf(a)
   return
 end
 
-global handles;
-moebius = handles.shapelab.common.moebius;
+global packages;
+moebius = packages.shapelab.common.moebius;
 %b = abs(a);
 %H = [1 b; b 1];
 H = abs(a)/a*[1 -a; -conj(a) 1];

@@ -15,9 +15,9 @@ function[z] = symmetric_zipup_to_ic(w,c,varargin)
 %     The number of possibilities are reduced compared to symmetric_unzip_from_ic because
 %     there are really only two regions where care must be taken.
 
-global handles;
-csqrt = handles.shapelab.common.positive_angle_square_root;
-opt = handles.common.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
+global packages;
+csqrt = packages.shapelab.common.positive_angle_square_root;
+opt = packages.labtools.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 
 interior = opt.point_id==0;
 rline = opt.point_id==1;

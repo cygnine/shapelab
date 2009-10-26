@@ -17,8 +17,8 @@ function[w] = positive_angle_exponential(z,a,varargin)
 %     the (+) x-axis side of the branch and which take the (-) x-axis side of
 %     the branch. For inputs not on the x-axis, this indicator is irrelevant.
 
-global handles;
-opt = handles.common.input_schema({'cut_bias'}, {true}, [], varargin{:});
+global packages;
+opt = packages.labtools.input_schema({'cut_bias'}, {true}, [], varargin{:});
 
 if length(opt.cut_bias)==1
   if opt.cut_bias

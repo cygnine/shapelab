@@ -1,6 +1,6 @@
-global handles;
-gd = handles.shapelab.conformal_mapping.zipper;
-weld = handles.shapelab.welding;
+global packages;
+gd = packages.shapelab.conformal_mapping.zipper;
+weld = packages.shapelab.welding;
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 

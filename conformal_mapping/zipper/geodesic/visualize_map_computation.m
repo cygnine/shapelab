@@ -16,8 +16,8 @@ function[z_initial,a_array,zeta_n] = visualize_map_computation(z_n)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %  mapping", 2006.
 
-global handles;
-evaluate_fa = handles.ConformalMapping.GeodesicAlgorithm.evaluate_fa;
+global packages;
+evaluate_fa = packages.ConformalMapping.GeodesicAlgorithm.evaluate_fa;
 figure();
 hold on;
 
