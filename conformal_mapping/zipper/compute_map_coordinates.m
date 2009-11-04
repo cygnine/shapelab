@@ -53,16 +53,16 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %          conformal mapping", 2006.
 
-global packages;
+from labtools input_schema
+zip = from_as('shapelab.conformal_mapping', 'zipper');
+[moebius, moebius_inv, csqrt] = from_as('shapelab.common', ...
+ 'moebius', 'moebius_inverse', 'positive_angle_square_root');
+
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
           'zip_magnitude','type','visualize'};
 defaults = {false, false, Inf, Inf, 1, 0.85, 'geodesic',false};
-opt = packages.labtools.input_schema(inputs,defaults,[],varargin{:});
-shapelab = packages.shapelab;
-zip = shapelab.conformal_mapping.zipper;
-moebius = shapelab.common.moebius;
-csqrt = packages.shapelab.common.positive_angle_square_root;
-moebius_inv = shapelab.common.moebius_inverse;
+opt = input_schema(inputs,defaults,[],varargin{:});
+
 moebius_plot = [-1, i;...
                 1, i];  % Just a map from half plane to unit circle.
 switch lower(opt.type)
