@@ -53,10 +53,15 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %          conformal mapping", 2006.
 
-from labtools input_schema
-zip = from_as('shapelab.conformal_mapping', 'zipper');
-[moebius, moebius_inv, csqrt] = from_as('shapelab.common', ...
- 'moebius', 'moebius_inverse', 'positive_angle_square_root');
+persistent input_schema zip moebius moebius_inv csqrt
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import moebius 
+  from shapelab.common import moebius_inverse as moebius_inv
+  from shapelab.common import positive_angle_square_root as csqrt
+
+  imp shapelab.conformal_mapping.zipper as zip
+end
 
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
           'zip_magnitude','type','visualize'};

@@ -21,7 +21,7 @@ function[v,w] = base_conformal_map(z,c,a,varargin)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %       mapping", 2006.
 
-persistent input_schema unzip meobius
+persistent input_schema unzip moebius
 if isempty(input_schema)
   from labtools import input_schema
   from shapelab.conformal_mapping.zipper.slit import slit_unzip_from_a as unzip

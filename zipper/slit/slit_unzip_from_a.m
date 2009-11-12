@@ -27,7 +27,7 @@ function[v,w] = slit_unzip_from_a(z,a,varargin)
 persistent input_schema newton bisection cpow symmetric_unzip_from_ic
 if isempty(input_schema)
   from labtools import input_schema
-  from labtools.rootfind import newton_raphson as nweton
+  from labtools.rootfind import newton_raphson as newton
   from labtools.rootfind import bisection
   from shapelab.common import positive_angle_exponential as cpow
   from shapelab.common import symmetric_unzip_from_ic
