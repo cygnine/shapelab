@@ -19,11 +19,15 @@ function[v,w] = slit_unzip_from_a(z,a,varargin)
 %
 %     TODO: currently using bisection on 2...get Newton's method to converge
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
-newton = packages.labtools.rootfind.newton_raphson;
-bisection = packages.labtools.rootfind.bisection;
-cpow = packages.shapelab.common.positive_angle_exponential;
+persisten input_schema newton bisection cpow
+if isempty(input_schema)
+  from labtools import input_schema
+  from labtools.rootfind import bisection
+  from labtools.rootfind import newton_raphson as newton
+  from shapelab.common import positive_angle_exponential as cpow
+end
+
+opt = input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
 
 interior = opt.point_id==0;
 gamma = opt.point_id==1;

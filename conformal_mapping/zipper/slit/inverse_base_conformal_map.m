@@ -16,10 +16,14 @@ function[w] = inverse_base_conformal_map(z,a,varargin)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %  mapping", 2006.
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, ...
+persistent input_schema zipup
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import slit_zipup_to_a as zipup
+end
+
+opt = input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
-zipup = packages.shapelab.common.slit_zipup_to_a;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 

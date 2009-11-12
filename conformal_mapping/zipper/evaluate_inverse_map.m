@@ -16,10 +16,19 @@ function[z]= evaluate_inverse_map(w,mapdata,varargin)
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %          conformal mapping", 2006.
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
-shapelab = packages.shapelab;
-zip = shapelab.conformal_mapping.zipper;
+persistent input_schema zip moebius moebius_inv csqrt pcpow ncpow
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import moebius
+  from shapelab.common import moebius_inverse as moebius_inv
+  from shapelab.common import positive_angle_square_root as csqrt
+  from shapelab.common import positive_angle_exponential as pcpow
+  from shapelab.common import negative_angle_exponential as ncpow
+
+  imp shapelab.conformal_mapping.zipper as zip
+end
+
+opt = input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 switch lower(mapdata.type)
 case 'geodesic'
   ifa = zip.geodesic.inverse_base_conformal_map;
@@ -37,11 +46,6 @@ case 'zipper_weld'
   zipper = true;
 end
 
-moebius = shapelab.common.moebius;
-moebius_inv = shapelab.common.moebius_inverse;
-csqrt = shapelab.common.positive_angle_square_root;
-pcpow = shapelab.common.positive_angle_exponential;
-ncpow = shapelab.common.negative_angle_exponential;
 
 % We must deal with three cases:
 w0 = w(opt.point_id==0);

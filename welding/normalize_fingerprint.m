@@ -9,8 +9,12 @@ function[tin,tout] = normalize_fingerprint(tin,tout,varargin)
 %
 %     Basically this function just saves typing.
 
-global packages;
-opt = packages.labtools.input_schema({'norm_point'}, {1}, [], varargin{:});
+persistent input_schema
+if isempty(input_schema)
+  from labtools import input_schema
+end
+
+opt = input_schema({'norm_point'}, {1}, [], varargin{:});
 
 tin = unwrap(tin);
 tout = unwrap(tout);

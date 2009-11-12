@@ -1,8 +1,7 @@
-global packages;
-clover = packages.shapelab.test_shapes.polar_clover;
-plinspace = packages.shapelab.common.polar_linspace;
-gd = packages.shapelab.conformal_mapping.zipper;
-weld = packages.shapelab.welding;
+from shapelab.test_shapes import polar_clover
+from shapelab.common import polar_linspace as plinspace
+imp shapelab.conformal_mapping.zipper as gd
+imp shapelab.welding as weld
 
 N = 100;
 opt.lobes = 4;

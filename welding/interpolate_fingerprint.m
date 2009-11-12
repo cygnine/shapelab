@@ -12,11 +12,15 @@ function[varargout] = interpolate_fingerprint(mapdata,varargin)
 %     This function doesn't do any 'unwrapping' of angle values; it just spits
 %     out whatever Matlab's angle function gives it. 
 
-global packages;
-welding = packages.shapelab.welding;
+persistent input_schema switch_zipper_side
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.welding import switch_zipper_side
+end
+
 inputs = {'theta_int', 'theta_ext'};
 defaults = {[], []};
-opt = packages.labtools.input_schema(inputs, defaults, [], varargin{:});
+opt = input_schema(inputs, defaults, [], varargin{:});
 
 s_int = size(opt.theta_int);
 s_ext = size(opt.theta_ext);
@@ -33,7 +37,7 @@ if N_ext>0
   point_id(N_int+1:end) = 2;
 end
 
-out = welding.switch_zipper_side(z, mapdata,'point_id', point_id);
+out = switch_zipper_side(z, mapdata,'point_id', point_id);
 
 if N_int==0;
   varargout{1} = reshape(angle(out(N_int+1:end)), s_ext);

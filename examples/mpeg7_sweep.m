@@ -7,12 +7,10 @@
 clear
 close all;
 
-global packages;
-explot = packages.labtools.explot;  % Some common functions
-ltex = packages.labtools.typelatex;
-figsave = packages.labtools.figsave;
+from labtools import explot figsave
+from labtools import typelatex as ltex
+imp shapelab
 
-shapelab = packages.shapelab;  % shapelab stuff
 zipper = shapelab.conformal_mapping.zipper;
 welding = packages.shapelab.welding;
 clover = shapelab.test_shapes.polar_clover;

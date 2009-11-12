@@ -3,13 +3,12 @@
 clear
 close all;
 
-global packages;
-explot = packages.labtools.explot;  % Some common functions
-ltex = packages.labtools.typelatex;
+from labtools import explot
+from labtools import typelatex as ltex
 
-shapelab = packages.shapelab;  % shapelab stuff
+imp shapelab
 zipper = shapelab.conformal_mapping.zipper;
-welding = packages.shapelab.welding;
+welding = shapelab.welding;
 clover = shapelab.test_shapes.polar_clover;
 fprint_norm = welding.normalize_fingerprint;
 

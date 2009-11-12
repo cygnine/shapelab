@@ -19,8 +19,12 @@ function[w] = negative_angle_exponential(z,varargin)
 %     the (+) x-axis side of the branch and which take the (-) x-axis side of
 %     the branch. For inputs not on the x-axis, this indicator is irrelevant.
 
-global packages;
-opt = packages.labtools.input_schema({'cut_bias', 'alpha'}, {true,1/2}, [], varargin{:});
+persistent input_schema
+if isempty(input_schema)
+  from labtools import input_schema
+end
+
+opt = input_schema({'cut_bias', 'alpha'}, {true,1/2}, [], varargin{:});
 
 if length(opt.cut_bias)==1
   if opt.cut_bias

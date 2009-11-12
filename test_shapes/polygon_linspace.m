@@ -11,8 +11,12 @@ function z = polygon_range(v,varargin)
 %     Explicity set N to false if you want to use step_size. The polygon is
 %     formed in same order as the points are given.
 
-global packages;
-opt = packages.labtools.input_schema({'step_size', 'N'}, {false, 100}, [], varargin{:});
+persistent input_schema
+if isempty(input_schema)
+  from labtools import input_schema
+end
+
+opt = input_schema({'step_size', 'N'}, {false, 100}, [], varargin{:});
 
 v = v(:);
 Nv = length(v);

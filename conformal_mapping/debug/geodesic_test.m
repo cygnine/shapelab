@@ -1,6 +1,7 @@
-global packages;
-gd = packages.shapelab.conformal_mapping.zipper;
-weld = packages.shapelab.welding;
+imp shapelab.conformal_mapping.zipper as gd
+imp shapelab.welding as weld
+from shapelab.common import moebius
+from shapelab.conformal_mapping.geodesic import base_conformal_map as fa
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 
@@ -54,8 +55,6 @@ wout_image = gd.evaluate_inverse_map(wout,mapdata);
 %tout = gd.evaluate_map(z,mapout);
 
 % Debugging stuff
-moebius = packages.shapelab.common.moebius;
-fa = packages.shapelab.conformal_mapping.geodesic.base_conformal_map;
 opt.z_in = 0;
 opt.z_out = 0;
 opt.winding_number = 1;

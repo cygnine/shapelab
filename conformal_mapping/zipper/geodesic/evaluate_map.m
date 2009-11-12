@@ -20,11 +20,13 @@ function[w]= evaluate_map(z,mapdata,varargin)
 %     [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for
 %     conformal mapping", 2006.
 
-global packages;
-%opt = packages.labtools.input_schema({'onshape'}, {false}, [], varargin{:});
-fa = packages.shapelab.conformal_mapping.zipper.geodesic.base_conformal_map;
-moebius = packages.shapelab.common.moebius;
-dab = packages.shapelab.common.disc_a_to_b;
+persistent input_schema fa moebius dab
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import moebius
+  from shapelab.conformal_mapping.zipper.geodesic import base_conformal_map as fa
+  from shapelab.common import disc_a_to_b as dab
+end
 
 [z_initial, a_array, a_cut_bias, normalization_persistence, zeta_n, normalization] = ...
   deal(mapdata.z_initial, mapdata.a_array, mapdata.a_cut_bias, ...

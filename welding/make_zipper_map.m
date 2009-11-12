@@ -9,10 +9,15 @@ function[mapdata] = make_zipper_map(z,varargin)
 %     the shape that is mapped to infinity. Only the sign of winding_number is
 %     used in the computations. 
 
-global packages;
+persistent input_schema compute_map_coordinates
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.conformal_mapping.zipper import compute_map_coordinates
+end
+
 inputs = {'type', 'shape_0', 'shape_infinity', 'winding_number','visualize'};
 defaults = {'zipper', false, Inf, 1,0};
-opt = packages.labtools.input_schema(inputs, defaults, [], varargin{:});
+opt = input_schema(inputs, defaults, [], varargin{:});
 
 mopt.type = opt.type;
 mopt.winding_number = opt.winding_number;
@@ -25,4 +30,4 @@ mopt.z_out = opt.shape_infinity;
 mopt.w_out = Inf;
 mopt.visualize = opt.visualize;
 
-mapdata = packages.shapelab.conformal_mapping.zipper.compute_map_coordinates(z, mopt);
+mapdata = compute_map_coordinates(z, mopt);

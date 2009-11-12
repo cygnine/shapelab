@@ -14,10 +14,16 @@ function[z] = switch_zipper_side(z,mapdata,varargin)
 %     z(point_id==2) -----> points on the exterior boundary of the unit disc
 %     that you want to map onto the interior.
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, {ones(size(z))}, [], varargin{:});
-shapelab = packages.shapelab;
-zip = shapelab.conformal_mapping.zipper;
+persistent input_schema moebius moebius_inv csqrt zip
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import moebius
+  from shapelab.common import moebius_inverse as moebius_inv
+  from shapelab.common import positive_angle_square_root as csqrt
+  imp shapelab.conformal_mapping.zipper as zip
+end
+
+opt = input_schema({'point_id'}, {ones(size(z))}, [], varargin{:});
 
 switch lower(mapdata.type)
 case 'geodesic'
@@ -39,10 +45,6 @@ case 'zipper_weld'
 otherwise
   error(['Unrecognized map type ' mapdata.type]);
 end
-
-moebius = packages.shapelab.common.moebius;
-moebius_inv = packages.shapelab.common.moebius_inverse;
-csqrt = packages.shapelab.common.positive_angle_square_root;
 
 N = length(mapdata.a_array)+1;
 % We must deal with two cases:

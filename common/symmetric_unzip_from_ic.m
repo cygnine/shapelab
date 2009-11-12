@@ -25,9 +25,13 @@ function[v,w] = symmetric_unzip_from_ic(z,c,varargin)
 %     The operations 1 and 2 are 'one-dimensional'; the operation on 0 is a
 %     complex-number operation.
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, {zeros(size(z),'int8')}, [], varargin{:});
-csqrt = packages.shapelab.common.positive_angle_square_root;
+persistent input_schema csqrt
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import positive_angle_square_root as csqrt
+end
+
+opt = input_schema({'point_id'}, {zeros(size(z),'int8')}, [], varargin{:});
 
 interior = opt.point_id==0;
 gamma = opt.point_id==1;

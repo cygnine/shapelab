@@ -6,6 +6,11 @@ function[w] = disc_a_to_0(z,a)
 %
 %     The inverse of disc_0_to_a.
 
+persistent moebius
+if isempty(moebius)
+  from shapelab.common import moebius
+end
+
 if abs(a)<1e-14
   w = z;
   return
@@ -14,8 +19,6 @@ elseif isinf(a)
   return
 end
 
-global packages;
-moebius = packages.shapelab.common.moebius;
 H = abs(a)/a*[1 -a; -conj(a) 1];
 w = moebius(z, H*abs(a)/a);
 %w = abs(a)/a*(z-a)./(1-conj(a)*z);

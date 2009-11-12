@@ -16,6 +16,7 @@ function[z_initial,a_array,zeta_n] = visualize_map_computation(z_n)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %  mapping", 2006.
 
+error('This function seems to be deprecated');
 global packages;
 evaluate_fa = packages.ConformalMapping.GeodesicAlgorithm.evaluate_fa;
 figure();

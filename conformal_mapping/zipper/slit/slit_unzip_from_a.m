@@ -24,12 +24,15 @@ function[v,w] = slit_unzip_from_a(z,a,varargin)
 %
 %     TODO: currently using bisection on 2...get Newton's method to converge
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
-newton = packages.labtools.rootfind.newton_raphson;
-bisection = packages.labtools.rootfind.bisection;
-cpow = packages.shapelab.common.positive_angle_exponential;
-common = packages.shapelab.common;
+persistent input_schema newton bisection cpow symmetric_unzip_from_ic
+if isempty(input_schema)
+  from labtools import input_schema
+  from labtools.rootfind import newton_raphson as nweton
+  from labtools.rootfind import bisection
+  from shapelab.common import positive_angle_exponential as cpow
+  from shapelab.common import symmetric_unzip_from_ic
+end
+opt = input_schema({'point_id'}, {zeros(size(z))}, [], varargin{:});
 
 interior = opt.point_id==0;
 gamma = opt.point_id==1;
@@ -74,8 +77,8 @@ if any(interior)
   temp_small(flags) = conj(temp_small(flags));
   flags = imag(temp_large)<0;
   temp_large(flags) = conj(temp_large(flags));
-  v0(small_angles) = p*common.symmetric_unzip_from_ic(temp_small,1);
-  v0(large_angles) = q*common.symmetric_unzip_from_ic(temp_large,1);
+  v0(small_angles) = p*symmetric_unzip_from_ic(temp_small,1);
+  v0(large_angles) = q*symmetric_unzip_from_ic(temp_large,1);
 
   % Newton iteration. Initial guess from Marshall:
   %v0 = z + 2*p-1 + p*q./(2*z) + ...

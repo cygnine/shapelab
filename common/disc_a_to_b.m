@@ -6,8 +6,10 @@ function[w] = disc_a_to_b(z,a,b)
 %
 %     TODO: figure this out explicitly to ameliorate roundoff.
 
-global packages;
-da0 = packages.shapelab.common.disc_a_to_0;
-d0b = packages.shapelab.common.disc_0_to_a;
+persistent da0 d0b
+if isempty(da0)
+  from shapelab.common import disc_a_to_0 as da0
+  from shapelab.common import disc_0_to_a as d0b
+end
 
 w = d0b(da0(z,a),b);

@@ -20,8 +20,12 @@ function[w] = positive_angle_square_root(z,varargin)
 %     In light of positive_angle_exponential, this function will probably be
 %     deprecated soon.
 
-global packages;
-opt = packages.labtools.input_schema({'cut_bias'}, {[]}, [], varargin{:});
+persistent input_schema
+if isempty(input_schema)
+  from labtools import input_schema
+end
+
+opt = input_schema({'cut_bias'}, {[]}, [], varargin{:});
 
 if length(opt.cut_bias)==1
   if opt.cut_bias

@@ -21,12 +21,15 @@ function[v,w] = base_conformal_map(z,c,a,varargin)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %       mapping", 2006.
 
-global packages;
-opt = packages.labtools.input_schema({'point_id'}, ...
+persistent input_schema unzip meobius
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.conformal_mapping.zipper.slit import slit_unzip_from_a as unzip
+  from shapelab.common import moebius
+end
+
+opt = input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});
-%unzip = packages.shapelab.common.slit_unzip_from_a;
-unzip = packages.shapelab.conformal_mapping.zipper.slit.slit_unzip_from_a;
-moebius = packages.shapelab.common.moebius;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 assert(length(c)==1, 'Error: not coded for vector-valued parameter c');

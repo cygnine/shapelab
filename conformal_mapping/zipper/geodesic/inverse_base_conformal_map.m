@@ -19,14 +19,18 @@ function[w] = inverse_base_conformal_map(z,a,varargin)
 %  [1]: Marshall and Rohde, "Convergence of the Zipper algorithm for conformal
 %       mapping", 2006.
 
-global packages;
+persistent input_schema moebius_inv zipup_at_c
+if isempty(input_schema)
+  from labtools import input_schema
+  from shapelab.common import moebius_inverse
+  from shapelab.common import symmetric_zipup_to_ic
+end
+
 % Intermediate points: see [1]
 b = abs(a)^2/real(a);
 c = abs(a)^2/imag(a);
-opt = packages.labtools.input_schema({'point_id','cut_magnitude'}, ...
+opt = input_schema({'point_id','cut_magnitude'}, ...
       {zeros(size(z),'int8'), c}, [],varargin{:});
-moebius_inv = packages.shapelab.common.moebius_inverse;
-zipup_at_c = packages.shapelab.common.symmetric_zipup_to_ic;
 
 assert(length(a)==1, 'Error: not coded for vector-valued parameter a');
 
