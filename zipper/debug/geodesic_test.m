@@ -1,7 +1,7 @@
-imp shapelab.conformal_mapping.zipper as gd
+imp shapelab.zipper as gd
 imp shapelab.welding as weld
 from shapelab.common import moebius
-from shapelab.conformal_mapping.geodesic import base_conformal_map as fa
+from shapelab.geodesic import base_conformal_map as fa
 
 N = 100;
 theta = linspace(-pi,pi,N+1); 

@@ -12,7 +12,7 @@ function[mapdata] = make_zipper_map(z,varargin)
 persistent input_schema compute_map_coordinates
 if isempty(input_schema)
   from labtools import input_schema
-  from shapelab.conformal_mapping.zipper import compute_map_coordinates
+  from shapelab.zipper import compute_map_coordinates
 end
 
 inputs = {'type', 'shape_0', 'shape_infinity', 'winding_number','visualize'};

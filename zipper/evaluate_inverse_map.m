@@ -25,7 +25,7 @@ if isempty(input_schema)
   from shapelab.common import positive_angle_exponential as pcpow
   from shapelab.common import negative_angle_exponential as ncpow
 
-  imp shapelab.conformal_mapping.zipper as zip
+  imp shapelab.zipper as zip
 end
 
 opt = input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});

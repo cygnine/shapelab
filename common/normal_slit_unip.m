@@ -1,5 +1,5 @@
-function[v,w] = symmetric_unzip_from_ic(z,c,varargin)
-% [v,w] = symmetric_unzip_from_ic(z,c,{point_id=zeros(size(z))})
+function[v,w] = normal_slit_unzip(z,c,varargin)
+% [v,w] = normal_slit_unzip(z,c,{point_id=zeros(size(z))})
 %
 %     Implements the rather unorthodox mapping sqrt(z^2 + c^2), for some
 %     real-valued c. This mapping takes the line segment (0,0) -- (0,c) and

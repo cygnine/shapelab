@@ -23,7 +23,7 @@ persistent input_schema moebius_inv zipup_at_c
 if isempty(input_schema)
   from labtools import input_schema
   from shapelab.common import moebius_inverse as moebius_inv
-  from shapelab.common import symmetric_zipup_to_ic as zipup_at_c
+  from shapelab.common import normal_slit_zipup as zipup_at_c
 end
 
 % Intermediate points: see [1]

@@ -1,8 +1,8 @@
-function[z] = symmetric_zipup_to_ic(w,c,varargin)
-% [z] = symmetric_zipup_to_ic(w,c,point_id=zeros(size(z)))
+function[z] = normal_slit_zipup(w,c,varargin)
+% [z] = normal_slit_zipup(w,c,point_id=zeros(size(z)))
 %
-%     Implements the inverse of symmetric_unzip_from_ic. I.e., the function sqrt(z^2 -
-%     c^2) for a real-valued c. As in symmetric_unzip_from_ic, the optional input point_id
+%     Implements the inverse of normal_slit_unzip I.e., the function sqrt(z^2 -
+%     c^2) for a real-valued c. As in normal_slit_unzip, the optional input point_id
 %     determines how the map behaves. The possible values of point_id are:
 %
 %     0: The point is somewhere in \mathbb{H}\backslash{\mathbb{R}}. Action of
@@ -12,7 +12,7 @@ function[z] = symmetric_zipup_to_ic(w,c,varargin)
 %     easily-testable case of 1, you may want to force this behavior in the case
 %     of machine-epsilon crap.
 %
-%     The number of possibilities are reduced compared to symmetric_unzip_from_ic because
+%     The number of possibilities are reduced compared to normal_slit_unzip because
 %     there are really only two regions where care must be taken.
 
 persistent csqrt input_schema

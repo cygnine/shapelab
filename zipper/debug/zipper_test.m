@@ -1,6 +1,6 @@
 from shapelab.test_shapes import polar_clover
 from shapelab.common import polar_linspace as plinspace
-imp shapelab.conformal_mapping.zipper as gd
+imp shapelab.zipper as gd
 imp shapelab.welding as weld
 
 N = 100;

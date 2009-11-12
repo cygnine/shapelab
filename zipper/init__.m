@@ -1,5 +1,5 @@
 function[zipper] = init__()
-% init__ -- Initialization file for shapelab/conformal_mapping/zipper package
+% init__ -- Initialization file for shapelab/zipper package
 %
 % [nodes] = init__()
 

@@ -1,4 +1,4 @@
-imp shapelab.conformal_mapping.zipper as zip
+imp shapelab.zipper as zip
 imp shapelab.welding as weld
 
 N = 100;

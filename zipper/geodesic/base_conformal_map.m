@@ -27,7 +27,7 @@ persistent input_schema moebius unzip_at_c
 if isempty(input_schema)
   from labtools import input_schema
   from shapelab.common import moebius
-  from shapelab.common import symmetric_unzip_from_ic as unzip_at_c
+  from shapelab.common import normal_slit_unzip as unzip_at_c
 end
 
 % Intermediate points: see [1]

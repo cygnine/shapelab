@@ -60,7 +60,7 @@ if isempty(input_schema)
   from shapelab.common import moebius_inverse as moebius_inv
   from shapelab.common import positive_angle_square_root as csqrt
 
-  imp shapelab.conformal_mapping.zipper as zip
+  imp shapelab.zipper as zip
 end
 
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...

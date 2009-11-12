@@ -7,7 +7,7 @@ from labtools import explot
 from labtools import typelatex as ltex
 
 imp shapelab
-zipper = shapelab.conformal_mapping.zipper;
+zipper = shapelab.zipper;
 welding = shapelab.welding;
 clover = shapelab.test_shapes.polar_clover;
 fprint_norm = welding.normalize_fingerprint;

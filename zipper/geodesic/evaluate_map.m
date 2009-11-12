@@ -24,7 +24,7 @@ persistent input_schema fa moebius dab
 if isempty(input_schema)
   from labtools import input_schema
   from shapelab.common import moebius
-  from shapelab.conformal_mapping.zipper.geodesic import base_conformal_map as fa
+  from shapelab.zipper.geodesic import base_conformal_map as fa
   from shapelab.common import disc_a_to_b as dab
 end
 

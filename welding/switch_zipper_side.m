@@ -20,7 +20,7 @@ if isempty(input_schema)
   from shapelab.common import moebius
   from shapelab.common import moebius_inverse as moebius_inv
   from shapelab.common import positive_angle_square_root as csqrt
-  imp shapelab.conformal_mapping.zipper as zip
+  imp shapelab.zipper as zip
 end
 
 opt = input_schema({'point_id'}, {ones(size(z))}, [], varargin{:});

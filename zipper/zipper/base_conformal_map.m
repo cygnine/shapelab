@@ -24,7 +24,7 @@ function[v,w] = base_conformal_map(z,c,a,varargin)
 persistent input_schema unzip moebius
 if isempty(input_schema)
   from labtools import input_schema
-  from shapelab.conformal_mapping.zipper.slit import slit_unzip_from_a as unzip
+  from shapelab.zipper.slit import slit_unzip_from_a as unzip
   from shapelab.common import moebius
 end
 
