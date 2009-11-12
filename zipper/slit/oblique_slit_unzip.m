@@ -1,9 +1,9 @@
-function[v,w] = slit_unzip_from_a(z,a,varargin)
-% [v,w] = slit_unzip_from_a(z,a,{point_id=zeros(size(z))})
+function[v,w] = oblique_slit_unzip(z,a,varargin)
+% [v,w] = oblique_slit_unzip(z,a,{point_id=zeros(size(z))})
 %
-%     Implements the inverse of slit_zipup_to_a. This function is defined by
+%     Implements the inverse of oblique_slit_zipup. This function is defined by
 %     Marshall in [1]. It is defined as the inverse of the explicit function
-%     slit_zipup_to_a.
+%     oblique_slit_zipup.
 %
 %     This function computes the inverse of the map
 %          z(w) = C*(w-p)^p*(w+q)^q,

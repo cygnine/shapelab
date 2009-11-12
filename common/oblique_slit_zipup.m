@@ -1,7 +1,7 @@
-function[z] = slit_zipup_to_a(w,a,varargin)
-% [z] = slit_zipup_to_a(w,a,{point_id=zeros(size(z))})
+function[z] = oblique_slit_zipup(w,a,varargin)
+% [z] = oblique_slit_zipup(w,a,{point_id=zeros(size(z))})
 %
-%     Implements the inverse of slit_unzip_from_a. This function is defined by
+%     Implements the inverse of oblique_slit_unzip. This function is defined by
 %     Marshall in [1]. Unlike its inverse, this function has an explicit form. 
 %
 %     0: The point is somewhere in \mathbb{H}\backslash{\mathbb{R}}. Action of

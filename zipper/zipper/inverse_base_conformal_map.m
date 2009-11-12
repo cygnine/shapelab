@@ -22,7 +22,7 @@ if isempty(input_schema)
   from labtools import input_schema
   from shapelab.common import moebius
   from shapelab.common import moebius_inverse as moebius_inv
-  from shapelab.common import slit_zipup_to_a as zipup
+  from shapelab.common import oblique_slit_zipup as zipup
 end
 opt = input_schema({'point_id'}, ...
       {zeros(size(z),'int8')}, [],varargin{:});

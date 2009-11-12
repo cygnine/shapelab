@@ -23,7 +23,7 @@ function[v,w] = base_conformal_map(z,a,varargin)
 persistent input_schema unzip
 if isempty(input_schema)
   from labtools import input_schema
-  from shapelab.zipper.slit import slit_unzip_from_a as unzip
+  from shapelab.zipper.slit import oblique_slit_unzip as unzip
 end
 
 opt = input_schema({'point_id'}, ...

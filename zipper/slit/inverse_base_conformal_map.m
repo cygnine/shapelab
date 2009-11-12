@@ -19,7 +19,7 @@ function[w] = inverse_base_conformal_map(z,a,varargin)
 persistent input_schema zipup
 if isempty(input_schema)
   from labtools import input_schema
-  from shapelab.common import slit_zipup_to_a as zipup
+  from shapelab.common import oblique_slit_zipup as zipup
 end
 
 opt = input_schema({'point_id'}, ...
