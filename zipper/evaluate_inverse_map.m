@@ -31,18 +31,18 @@ end
 opt = input_schema({'point_id'}, {zeros(size(w))}, [], varargin{:});
 switch lower(mapdata.type)
 case 'geodesic'
-  ifa = zip.geodesic.inverse_base_conformal_map;
+  ifa = zip.geodesic.inverse_base_map;
   zipper = false;
 case 'slit'
-  ifa = zip.slit.inverse_base_conformal_map;
+  ifa = zip.slit.inverse_base_map;
   zipper = false;
 case 'zipper'
   warning('For exterior points, I can''t guarantee that this won''t return garbage');
-  ifa = zip.zipper.inverse_base_conformal_map;
+  ifa = zip.zipper.inverse_base_map;
   zipper = true;
 case 'zipper_weld'
-  ifa = zip.zipper.inverse_base_conformal_map;
-  ifa_geo = zip.geodesic.inverse_base_conformal_map;
+  ifa = zip.zipper.inverse_base_map;
+  ifa_geo = zip.geodesic.inverse_base_map;
   zipper = true;
 end
 

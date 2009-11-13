@@ -1,5 +1,5 @@
-function[v,w] = base_conformal_map(z,c,a,varargin)
-% [v,w] = base_conformal_map(z,c,a,{point_id=zeros(size(z)),cut_magnitude=abs(a)^2/imag(a))
+function[v,w] = base_map(z,c,a,varargin)
+% [v,w] = base_map(z,c,a,{point_id=zeros(size(z)),cut_magnitude=abs(a)^2/imag(a))
 %
 %     Referring to [1], evaluates the conformal mapping function f_{c,a}, which is a
 %     basic building block for the `zipper' conformal mapping

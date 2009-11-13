@@ -1,5 +1,5 @@
-function[w] = inverse_base_conformal_map(z,c,a,varargin)
-% [w] = inverse_base_conformal_map(z,c,a,{point_id=zeros(size(z)),cut_magnitude=abs(a))
+function[w] = inverse_base_map(z,c,a,varargin)
+% [w] = inverse_base_map(z,c,a,{point_id=zeros(size(z)),cut_magnitude=abs(a))
 %
 %     Referring to [1], evaluates the inverse of the conformal mapping function
 %     f_a, which is a basic building block for the `zipper algorithm'

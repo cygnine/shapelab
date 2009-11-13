@@ -1,5 +1,5 @@
-function[w] = inverse_base_conformal_map(z,a,varargin)
-% [v,w] = inverse_base_conformal_map(z,a,{point_id=zeros(size(z)),cut_magnitude=abs(a)^2/imag(a))
+function[w] = inverse_base_map(z,a,varargin)
+% [v,w] = inverse_base_map(z,a,{point_id=zeros(size(z)),cut_magnitude=abs(a)^2/imag(a))
 %
 %     Referring to [1], evaluates the inverse of the conformal mapping function
 %     f_a, which is a basic building block for the `geodesic algorithm'

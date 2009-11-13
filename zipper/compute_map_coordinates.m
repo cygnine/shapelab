@@ -72,17 +72,17 @@ moebius_plot = [-1, i;...
                 1, i];  % Just a map from half plane to unit circle.
 switch lower(opt.type)
 case 'geodesic'
-  fa = zip.geodesic.base_conformal_map;
+  fa = zip.geodesic.base_map;
   zipper = false;
 case 'slit'
-  fa = zip.slit.base_conformal_map;
+  fa = zip.slit.base_map;
   zipper = false;
 case 'zipper'
-  fa = zip.zipper.base_conformal_map;
+  fa = zip.zipper.base_map;
   zipper = true;
 case 'zipper_weld'
-  fa = zip.zipper.base_conformal_map;
-  fa_geo = zip.geodesic.base_conformal_map;
+  fa = zip.zipper.base_map;
+  fa_geo = zip.geodesic.base_map;
   zipper = true;
 otherwise
   error(['Unrecognized algorithm specification ''' opt.type '''']);

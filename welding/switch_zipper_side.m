@@ -27,20 +27,20 @@ opt = input_schema({'point_id'}, {ones(size(z))}, [], varargin{:});
 
 switch lower(mapdata.type)
 case 'geodesic'
-  ifa = zip.geodesic.inverse_base_conformal_map;
-  fa = zip.geodesic.base_conformal_map;
+  ifa = zip.geodesic.inverse_base_map;
+  fa = zip.geodesic.base_map;
   zipper = false;
 case 'slit'
-  ifa = zip.slit.inverse_base_conformal_map;
-  fa = zip.slit.base_conformal_map;
+  ifa = zip.slit.inverse_base_map;
+  fa = zip.slit.base_map;
   zipper = false;
 case 'zipper'
   error('This isn''t a welding-capable map');
 case 'zipper_weld'
-  ifa_geo = zip.geodesic.inverse_base_conformal_map;
-  fa_geo = zip.geodesic.base_conformal_map;
-  ifa = zip.zipper.inverse_base_conformal_map;
-  fa = zip.zipper.base_conformal_map;
+  ifa_geo = zip.geodesic.inverse_base_map;
+  fa_geo = zip.geodesic.base_map;
+  ifa = zip.zipper.inverse_base_map;
+  fa = zip.zipper.base_map;
   zipper = true;
 otherwise
   error(['Unrecognized map type ' mapdata.type]);
