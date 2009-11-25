@@ -8,3 +8,4 @@ shapelab.zipper = matlab_import('zipper');
 shapelab.test_shapes = matlab_import('test_shapes');
 shapelab.welding = matlab_import('welding');
 shapelab.loewner = matlab_import('loewner');
+shapelab.curves = matlab_import('curves');
