@@ -18,7 +18,7 @@ if isempty(gq)
   from piecewise_interpolation.grid_tools import replicate_local_nodes as repnodes
 
   % Default order of quadrature: 
-  N = 50;
+  N = 100;
   [x,w] = gq(N, 'alpha', 0, 'beta', 0);
 end
 
