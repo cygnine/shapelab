@@ -16,14 +16,19 @@ N = length(z);
 f = @(xx) curv_func(xx(1:(N-1)),xx(N:end),z);
 df = @(xx) dcurv_func(xx(1:(N-1)), xx(N:end));
 
-max_iter = 2000;
+max_iter = 100;
 ftol = 1e-12;
 
 N_iter = 0;
 
 err = f(x);
 while (norm(err)>ftol) & (N_iter < max_iter)
-  dx = -inv(df(x))*err;
+  %dx = -inv(df(x))*err;
+  dx = -df(x)\err;
+  if any(not(isfinite(dx)))
+    err = Inf;
+    break
+  end
   x = x + dx;
 
   err = f(x);
@@ -33,6 +38,7 @@ end
 if norm(err)>ftol;
   fprintf('Failed to converge\n');
   converged = false;
+  x = NaN(size(x));
 else
   converged = true;
 end
