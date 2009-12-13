@@ -32,9 +32,9 @@ else
 
   s(2) = atan2(k(2)*x(3)+sin(k(1)), -k(2)*y(3) + cos(k(1)));
   s(2) = (s(2) - k(1))/k(2);
-end
 
-s = mod(s, abs(2*pi/k(2)));  % s should be monotone
+  s = mod(s, abs(2*pi/k(2)));  % s should be monotone
+end
 
 k = k(:);
 s = s(:);

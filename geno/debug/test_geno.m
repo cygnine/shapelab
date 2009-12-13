@@ -13,9 +13,12 @@ from shapelab.curves import circle_coefficients eval_curvature_samples
 cd ../../test_shapes
 load mpeg7_contours;
 cd ../geno/debug;
-temp = mpeg7_contour{1355};
+%temp = mpeg7_contour{1355};
+temp = mpeg7_contour{167};
 N = 100;
 z = temp(round(linspace(1,length(temp),N+1))); 
+
+z = temp(1:20:(end-6));
 
 %theta = linspace(0, 2*pi, 30);
 %theta(end) = [];

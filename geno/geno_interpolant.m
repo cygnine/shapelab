@@ -86,6 +86,8 @@ else  % closed curve
 
     [k,s] = curv_coeffs(z(current_stencil));
 
+    break_interpolation = false;
+
     for qq = 2:opt.k;
       left_stencil = index_mod([current_stencil(1)-1; current_stencil],N);
       right_stencil = index_mod([current_stencil; current_stencil(end)+1],N);
@@ -100,6 +102,12 @@ else  % closed curve
       end
 
       choose_side();
+      if break_interpolation
+        % Pad vectors with zeros and quit
+        k = [k; zeros([opt.k-qq+1 1])];
+        s = [s; zeros([opt.k-qq+1 1])];
+        break
+      end
       assign_ks();
 
     end
@@ -131,7 +139,8 @@ function[] = choose_side()
   elseif isnan(k_l(1))
     choose_left = false;
     if isnan(k_r(1))
-      error('Couldn''t interpolate to either side');
+      disp('Couldn''t interpolate to either side');
+      break_interpolation = true;
     end
   elseif isnan(k_r(1))
     choose_left = true;
