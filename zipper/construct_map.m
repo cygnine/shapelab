@@ -1,7 +1,7 @@
-function[mapdata] = compute_map_coordinates(z_n,varargin)
-% compute_map_coordinates -- Calculates a sequential conformal map
+function[mapdata] = construct_map(z_n,varargin)
+% construct_map -- Calculates a sequential conformal map
 %
-% [mapdata] = compute_map_coordinates(z_n,{z_in=false,w_in=false,
+% [mapdata] = construct_map(z_n,{z_in=false,w_in=false,
 %                 z_out=false, w_out=false, winding_number=1,
 %                 zip_magnitude=0.85, type='geodesic'})
 %
@@ -54,11 +54,19 @@ function[mapdata] = compute_map_coordinates(z_n,varargin)
 %          conformal mapping", 2006.
 
 persistent input_schema zip moebius moebius_inv csqrt
+persistent zipper_driver ...
+           geodesic_driver ...
+           slit_driver ...
+           zipper_weld_driver ...
+           loewner_driver ...
+           visualize
+
 if isempty(input_schema)
   from labtools import input_schema
   from shapelab.common import moebius 
   from shapelab.common import moebius_inverse as moebius_inv
   from shapelab.common import positive_angle_square_root as csqrt
+  from shapelab.zipper.drivers import *
 
   imp shapelab.zipper as zip
 end
@@ -70,6 +78,7 @@ opt = input_schema(inputs,defaults,[],varargin{:});
 
 moebius_plot = [-1, i;...
                 1, i];  % Just a map from half plane to unit circle.
+
 switch lower(opt.type)
 case 'geodesic'
   fa = zip.geodesic.base_map;
@@ -84,6 +93,10 @@ case 'zipper_weld'
   fa = zip.zipper.base_map;
   fa_geo = zip.geodesic.base_map;
   zipper = true;
+case 'loewner'
+  % DO SOMETHING??
+  %error('Not yet supported');
+  zipper = false;
 otherwise
   error(['Unrecognized algorithm specification ''' opt.type '''']);
 end
@@ -117,7 +130,6 @@ if zipper
   m_initial = [(z_initial(2) - z_initial(1))*[1, -z_initial(3)]; ...
                (z_initial(2) - z_initial(3))*[1, -z_initial(1)]];
   zeta_n = csqrt(moebius(zeta_n(3:end), m_initial));
-  %zeta_n = sqrt(moebius(zeta_n(3:end), m_initial));
   zeta_n(end) = Inf; % sadly, sqrt(complex Inf) = NaN
 
   unzipped_in = [Inf; -1; 0]; % original z_1, z_2, z_3
@@ -125,7 +137,6 @@ if zipper
 else
   m_initial = [1 -z_initial(2);...
                1 -z_initial(1)];
-  %zeta_n = i*csqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
   zeta_n = i*sqrt(moebius(zeta_n(2:end), m_initial)); % don't need original z(2)
   zeta_n(end) = Inf; % sadly, sqrt(complex Inf) = NaN
 
@@ -134,8 +145,9 @@ else
 end
 %%
 
-[shape_plot,zin_plot,zout_plot] = initialize_visualization();
-visualize(); 
+visdata = initialize_visualization();
+visdata.visualize = opt.visualize;
+%visualize(); 
 
 %% Initialization for looping over teeth
 fa_opt.cut_magnitude = opt.zip_magnitude;
@@ -145,79 +157,80 @@ else
   N_teeth = N-2;
 end
 
-a_array = zeros([N_teeth+1,1]);
-c_array = zeros([N_teeth+1,1]); % Only needed for zipper, really
+%a_array = zeros([N_teeth+1,1]);
+%c_array = zeros([N_teeth+1,1]); % Only needed for zipper, really
 
-% Some moebius transforms to normalize things
-m1 = [-1, i; ...
-       1, i];  % to unit circle
-m5 = [i, -i; ...
-      -1, -1]; % invert m1
-%%
+% Loop over teeth:
+switch opt.type
+case 'geodesic'
+  [mapdata,zeta_n] = geodesic_driver(zeta_n,unzipped_in,unzipped_out,N_teeth,fa_opt,visdata);
+  a_array = mapdata.a_array;
+  unzipped_in = mapdata.unzipped_in;
+  unzipped_out = mapdata.unzipped_out;
+  c_array = [];
+%case 'slit'
+%  mapdata = slit_driver(zeta_n,unzipped_in,unzipped_out,N_teeth,f_data,visdata);
+%case 'zipper'
+%  mapdata = zipper_driver(zeta_n,unzipped_in,unzipped_out...)
+%case 'zipper_weld'
+%  mapdata = zipper_weld_driver(zeta_n,unzipped_in,unzipped_out...)
+case 'loewner'
+  [mapdata, otherdata, zeta_n] = loewner_driver(zeta_n,unzipped_in,unzipped_out,N_teeth, visdata);
+  unzipped_in = mapdata.unzipped_in - otherdata.lambda(end);
+  unzipped_out = mapdata.unzipped_out - otherdata.lambda(end);
+  zeta_n = zeta_n - otherdata.lambda(end);
+  a_array = 1/zeta_n(3);
+  c_array = [];
+  pause
+end
 
 %% Looping over teeth
-for q = 1:N_teeth
-  if zipper
-    %% First apply a map that pushes z_in to i:
-    %a = moebius(zeta_n(end-1), m1);
-    %if abs(a)>1e-12
-    %  m3 = [abs(a)/a -abs(a); ...
-    %    -conj(a) 1];  % map a to 0
-    %  else
-    %  m3 = eye(2);
-    %end
-    %mfull = m5*m3*m1;
-    %mfull = real(mfull/mfull(1,1));
-
-    % Map all the stuff:
-    %zeta_n = moebius(zeta_n,mfull);
-    %unzipped_in = moebius(unzipped_in, mfull);
-    %unzipped_out = moebius(unzipped_out, mfull);
-
-    % Need next two points to define the map:
-    c_array(q) = zeta_n(1);
-    a_array(q) = zeta_n(2);
-
-    % Apply the map to all the points
-    % interior points + infinity + z_in + original z(1)
-    temp = zeros(size(zeta_n(3:end)));
-    temp(end) = 2;
-    fa_opt.point_id = temp;
-    zeta_n = fa(zeta_n(3:end),c_array(q),a_array(q), fa_opt);
-
-    % append new points to unzipped_in, unzipped_out
-    unzipped_in(end+1:end+2) = [c_array(q); a_array(q)];
-    unzipped_out(end+1:end+2) = [c_array(q); a_array(q)];
-    temp = 2*ones(size(unzipped_in), 'int8'); temp(end-2:end) = 1;
-    fa_opt.point_id = temp;
-    [unzipped_in,garbage] = fa(unzipped_in,c_array(q),a_array(q),fa_opt);
-    [garbage,unzipped_out] = fa(unzipped_out,c_array(q),a_array(q),fa_opt);
-
-    % we know:
-    unzipped_in(end) = 0; unzipped_out(end) = 0;
-  else
-    % The next map is defined by the parameter:
-    a_array(q) = zeta_n(1);
-
-    % Apply the map to all the points
-    % interior points + infinity + z_in + original z(1)
-    temp = zeros(size(zeta_n(2:end)));
-    temp(end) = 2;
-    fa_opt.point_id = temp;
-    zeta_n = fa(zeta_n(2:end),a_array(q),fa_opt);
-
-    temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
-    fa_opt.point_id = temp;
-    [unzipped_in,garbage] = fa(unzipped_in,a_array(q),fa_opt);
-    [garbage,unzipped_out] = fa(unzipped_out,a_array(q),fa_opt);
-
-    % Now add 0 to the list of zipped_in/out points:
-    unzipped_in(end+1) = 0;
-    unzipped_out(end+1) = 0;
-  end
-  %abs(moebius(zeta_n(end-3:end),moebius_plot)) - 1
-  visualize();  
-end
+% for q = 1:N_teeth
+%   if zipper
+%     % Need next two points to define the map:
+%     c_array(q) = zeta_n(1);
+%     a_array(q) = zeta_n(2);
+% 
+%     % Apply the map to all the points
+%     % interior points + infinity + z_in + original z(1)
+%     temp = zeros(size(zeta_n(3:end)));
+%     temp(end) = 2;
+%     fa_opt.point_id = temp;
+%     zeta_n = fa(zeta_n(3:end),c_array(q),a_array(q), fa_opt);
+% 
+%     % append new points to unzipped_in, unzipped_out
+%     unzipped_in(end+1:end+2) = [c_array(q); a_array(q)];
+%     unzipped_out(end+1:end+2) = [c_array(q); a_array(q)];
+%     temp = 2*ones(size(unzipped_in), 'int8'); temp(end-2:end) = 1;
+%     fa_opt.point_id = temp;
+%     [unzipped_in,garbage] = fa(unzipped_in,c_array(q),a_array(q),fa_opt);
+%     [garbage,unzipped_out] = fa(unzipped_out,c_array(q),a_array(q),fa_opt);
+% 
+%     % we know:
+%     unzipped_in(end) = 0; unzipped_out(end) = 0;
+%   else
+%     % The next map is defined by the parameter:
+%     a_array(q) = zeta_n(1);
+% 
+%     % Apply the map to all the points
+%     % interior points + infinity + z_in + original z(1)
+%     temp = zeros(size(zeta_n(2:end)));
+%     temp(end) = 2;
+%     fa_opt.point_id = temp;
+%     zeta_n = fa(zeta_n(2:end),a_array(q),fa_opt);
+% 
+%     temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
+%     fa_opt.point_id = temp;
+%     [unzipped_in,garbage] = fa(unzipped_in,a_array(q),fa_opt);
+%     [garbage,unzipped_out] = fa(unzipped_out,a_array(q),fa_opt);
+% 
+%     % Now add 0 to the list of zipped_in/out points:
+%     unzipped_in(end+1) = 0;
+%     unzipped_out(end+1) = 0;
+%   end
+% 
+%   %visualize();  
+% end
 %%
 
 %% Terminal map
@@ -266,7 +279,7 @@ else
   % Finally, the terminal map. By now, only 3 points are left: z_out, z_in, z(1)
   a_array(end) = 1/zeta_n(3);
   m = [ 1              0; ...
-       -a_array(end) 1];
+       -a_array(end)   1];
   %% Care about where z_out + z_in points go:
   zeta_n = -sign(opt.winding_number)*moebius(zeta_n(1:2), m).^2;
 
@@ -276,7 +289,6 @@ else
 end
 %%
 
-%% PSL(2)-type maps
 % Some moebius maps:
 m1 = [-1, i; ...
        1, i];  % to unit circle
@@ -289,14 +301,6 @@ m5 = [i, -i; ...
 
 % Always specify the exterior map
 map_to = 1/opt.w_out;
-%%if isa(opt.w_out,'logical') & opt.z_out==false
-%if isa(opt.w_out,'logical')
-%  % Map infinity to infinity
-%  opt.w_out = Inf;
-%  map_to = 0;
-%else
-%  map_to = 1/opt.w_out;
-%end
 
 a = moebius(zeta_n(1), m2*m1); % image of z_out to disc
 m3a = [abs(a)/a -abs(a); ...
@@ -345,6 +349,8 @@ m = [-1, i;...
 unzipped_in = moebius(unzipped_in, m);
 unzipped_out = moebius(unzipped_out, m);
 
+clear mapdata
+
 % Hmmm...screaming new data structure
 [mapdata.a_array, mapdata.zip_magnitude, mapdata.z_in, mapdata.w_in,...
  mapdata.z_out, mapdata.w_out, mapdata.vertices_in, mapdata.vertices_out,...
@@ -354,19 +360,23 @@ unzipped_out = moebius(unzipped_out, m);
       unzipped_in, unzipped_out, opt.winding_number, m_in, m_out, m_initial,...
       opt.type, c_array, N_teeth);
 
-   function visualize()
-    if opt.visualize
-      z_data = moebius([0; zeta_n(1:end-3)],moebius_plot);
-      zin_data = moebius(unzipped_in,moebius_plot);
-      zout_data = moebius(unzipped_out,moebius_plot);
-      set(shape_plot, 'xdata', real(z_data), 'ydata', imag(z_data));
-      set(zin_plot, 'xdata', real(zin_data), 'ydata', imag(zin_data));
-      set(zout_plot, 'xdata', real(zout_data), 'ydata', imag(zout_data));
-      drawnow;
-    end
-  end 
+if strcmp(opt.type, 'loewner')
+  mapdata.loewner_data = otherdata;
+end
 
-  function[shape_plot,zin_plot,zout_plot]=initialize_visualization()
+%   function visualize()
+%    if opt.visualize
+%      z_data = moebius([0; zeta_n(1:end-3)],moebius_plot);
+%      zin_data = moebius(unzipped_in,moebius_plot);
+%      zout_data = moebius(unzipped_out,moebius_plot);
+%      set(shape_plot, 'xdata', real(z_data), 'ydata', imag(z_data));
+%      set(zin_plot, 'xdata', real(zin_data), 'ydata', imag(zin_data));
+%      set(zout_plot, 'xdata', real(zout_data), 'ydata', imag(zout_data));
+%      drawnow;
+%    end
+%  end 
+
+  function[visdata]=initialize_visualization()
     if opt.visualize
       figure(); 
       theta = linspace(0,2*pi,200);
@@ -384,6 +394,10 @@ unzipped_out = moebius(unzipped_out, m);
       zin_plot = 0;
       zout_plot = 0;
     end
+
+    visdata.shape_plot = shape_plot;
+    visdata.zin_plot = zin_plot;
+    visdata.zout_plot = zout_plot;
   end
 
 end

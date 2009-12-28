@@ -7,3 +7,4 @@ zipper = recurse_files(pwd);
 zipper.geodesic = matlab_import('geodesic');
 zipper.slit = matlab_import('slit');
 zipper.zipper = matlab_import('zipper');
+zipper.drivers = matlab_import('drivers');

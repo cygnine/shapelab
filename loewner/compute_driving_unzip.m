@@ -1,7 +1,7 @@
 function[s,lambda,dlambda,g,gn] = compute_driving_unzip(z, varargin)
 % compute_driving_unzip -- point-evaluations of a Loewner ODE driving function
 %
-% [s,lambda,dlambda,gplus,gminus] = compute_driving_unzip(z, {s=[]},visualize=false)
+% [s,lambda,dlambda,gplus,gminus] = compute_driving_unzip(z, {visualize=false})
 %
 %     This function performs the same operations as compute_driving_function,
 %     except it also gives the outputs gplus and gminus, which are evaluations

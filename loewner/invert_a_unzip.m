@@ -17,6 +17,9 @@ function [gplus,gminus] = invert_a_unzip(aplus,aminus, xi);
 %     inversion relation. When a is complex, the values are the same; when a is
 %     real-valued, different branches are chosen.
 
+pflags = isinf(aplus);
+mflags = isinf(aminus);
+
 reals = (imag(aplus)==0);
 
 discriminant = sqrt(2*aplus + xi.^2);
@@ -34,3 +37,6 @@ gminus = gplus;
 % Real numbers -- requires 'branch' information
 gplus(reals) = xi + discriminant(reals);
 gminus(reals) = xi - sqrt(2*aminus(reals) + xi.^2);
+
+gplus(pflags) = Inf;
+gminus(mflags) = Inf;
