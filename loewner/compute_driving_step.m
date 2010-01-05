@@ -1,8 +1,9 @@
 function[new_lambda, dlambda, ds, a, an, g, gn] = compute_driving_step(a, an, g, gn, lambda, q,M);
 
-persistent invert_a
+persistent invert_a fe
 if isempty(invert_a)
   from shapelab.loewner import invert_a_unzip as invert_a
+  from shapelab.loewner.predictions import fe
 end
 
 pflags = isinf(g);
@@ -17,16 +18,15 @@ new_lambda(1) = lambda;
 
 for qq = 1:M
 
-  dl_prediction = imag(a(end_ind))/imag(g(end_ind));
-  
-  ds_prediction = real((dl_prediction^2 + 2*lambda*dl_prediction - ...
-                        2*g(end_ind)*dl_prediction + lambda^2 + ...
-                        g(end_ind)^2 - 2*lambda*g(end_ind))/(-4));
+  data.a = a(end_ind);
+  data.g = g(end_ind);
+  data.lambda = lambda;
+  temp = fe(data);
 
-  dlambda(qq) = dl_prediction/ds_prediction;
+  dlambda(qq) = temp.dlambda;
 
   % But now only take a step as big as ds_prediction*qq/M
-  ds(qq) = ds_prediction*1/(M+1-qq);
+  ds(qq) = temp.ds*1/(M+1-qq);
 
   % Evolve lambda:
   new_lambda(qq+1) = new_lambda(qq) + ds(qq)*dlambda(qq);

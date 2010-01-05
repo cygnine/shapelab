@@ -60,7 +60,7 @@ z = zeros(size(w));
 if any(opt.point_id==0)
   % Meh, just in case
   if any(abs(w0)==1)
-    error('Point(s) specified as strictly not on unit circle looks like it is');
+    error('Point(s) specified as strictly not on unit circle looks like they are');
   end
   ext_points = abs(w0)>1;
   int_points = abs(w0)<1;

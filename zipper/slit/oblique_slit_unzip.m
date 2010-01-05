@@ -106,7 +106,6 @@ end
 % If we're on gamma, then the solution on the real line satisfies (x-p)<0 and
 % (x+q)>0. We know the phase, so let's just do real-valued iterations. For the
 % initial guesses, we'll just use the bounding intervals, [-q,0] and [0,p]
-% TODO: can we use bisection?
 if any(gamma)
   f = @(x) (p-x).^p.*(x+q).^q;
 

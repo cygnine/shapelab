@@ -13,7 +13,7 @@ end
 %z_in = [z_in; zeros([Q 1])];
 %z_out = [z_out; zeros([Q 1])];
 
-M = 10; % Number of sub-samples
+M = 30; % Number of sub-samples
 
 lambda = zeros([Q*M+1 1]);
 dlambda = zeros([Q*M 1]);
@@ -40,16 +40,7 @@ for q = 1:Q
     dlambda((ind1-1):(ind2-1)) = dlambdan;
 
     if visdata.visualize
-      %inds1 = (N+1):M:(length(g)-3);
-      %inds2 = 1:M:(q*M+1);
-      %visualize(g(inds1), g(inds2), gn(inds2), visdata);
       visualize(g((q+N):(end-3)), g(1:(q+1)), gn(1:(q+1)), visdata)
-      %pause
-      %tempa = diff(g(2:(q+1)));
-      %tempb = diff(gn(2:(q+1)));
-      %if any(tempa>0) | any(tempb<0)
-      %  pause
-      %end
     end
 end
 

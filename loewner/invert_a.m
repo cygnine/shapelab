@@ -18,11 +18,15 @@ discriminant = sqrt(2*a + xi.^2);
 g = zeros(size(a));
 
 % All complex numbers -- no information other than a and xi required
-g1 = xi + discriminant(~reals);
-g2 = xi - discriminant(~reals);
-flags = imag(g1)<0;
-g1(flags) = g2(flags);
-g(~reals) = g1;
+if any(~reals)
+  g1 = xi + discriminant(~reals);
+  g2 = xi - discriminant(~reals);
+  flags = imag(g1)<0;
+  g1(flags) = g2(flags);
+  g(~reals) = g1;
+end
 
 % Real numbers -- requires 'branch' information
-g(reals) = xi + (2*branch(reals)-1).*discriminant(reals);
+if any(reals)
+  g(reals) = xi + (2*branch(reals)-1).*discriminant(reals);
+end

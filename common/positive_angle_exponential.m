@@ -1,5 +1,5 @@
 function[w] = positive_angle_exponential(z,a,varargin)
-% [w] = positive_angle_exponential(z,{cut_bias=[]})
+% [w] = positive_angle_exponential(z,a,{cut_bias=[]})
 % 
 %     The input z (vector-supported) has form r*exp(i*phi), where phi \in
 %     [0,2*pi). This function returns r^(a)*exp(i*phi*a). Note that this

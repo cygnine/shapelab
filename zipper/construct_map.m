@@ -44,7 +44,7 @@ function[mapdata] = construct_map(z_n,varargin)
 %     The option zip_magnitude refers to how each 'base' map is normalized.
 %     Empirically, values O(1) produce stable results.
 %
-%     The `type' of mapping can be: 'geodesic', 'slit', or 'zipper'.
+%     The `type' of mapping can be: 'geodesic', 'slit', 'zipper', or 'loewner'.
 %
 %     A note on normalization: this function normalizes the interior and
 %     exterior moebius maps so that the first vertex of the shape lies at the
@@ -94,8 +94,6 @@ case 'zipper_weld'
   fa_geo = zip.geodesic.base_map;
   zipper = true;
 case 'loewner'
-  % DO SOMETHING??
-  %error('Not yet supported');
   zipper = false;
 otherwise
   error(['Unrecognized algorithm specification ''' opt.type '''']);
@@ -157,9 +155,6 @@ else
   N_teeth = N-2;
 end
 
-%a_array = zeros([N_teeth+1,1]);
-%c_array = zeros([N_teeth+1,1]); % Only needed for zipper, really
-
 % Loop over teeth:
 switch opt.type
 case 'geodesic'
@@ -181,57 +176,7 @@ case 'loewner'
   zeta_n = zeta_n - otherdata.lambda(end);
   a_array = 1/zeta_n(3);
   c_array = [];
-  pause
 end
-
-%% Looping over teeth
-% for q = 1:N_teeth
-%   if zipper
-%     % Need next two points to define the map:
-%     c_array(q) = zeta_n(1);
-%     a_array(q) = zeta_n(2);
-% 
-%     % Apply the map to all the points
-%     % interior points + infinity + z_in + original z(1)
-%     temp = zeros(size(zeta_n(3:end)));
-%     temp(end) = 2;
-%     fa_opt.point_id = temp;
-%     zeta_n = fa(zeta_n(3:end),c_array(q),a_array(q), fa_opt);
-% 
-%     % append new points to unzipped_in, unzipped_out
-%     unzipped_in(end+1:end+2) = [c_array(q); a_array(q)];
-%     unzipped_out(end+1:end+2) = [c_array(q); a_array(q)];
-%     temp = 2*ones(size(unzipped_in), 'int8'); temp(end-2:end) = 1;
-%     fa_opt.point_id = temp;
-%     [unzipped_in,garbage] = fa(unzipped_in,c_array(q),a_array(q),fa_opt);
-%     [garbage,unzipped_out] = fa(unzipped_out,c_array(q),a_array(q),fa_opt);
-% 
-%     % we know:
-%     unzipped_in(end) = 0; unzipped_out(end) = 0;
-%   else
-%     % The next map is defined by the parameter:
-%     a_array(q) = zeta_n(1);
-% 
-%     % Apply the map to all the points
-%     % interior points + infinity + z_in + original z(1)
-%     temp = zeros(size(zeta_n(2:end)));
-%     temp(end) = 2;
-%     fa_opt.point_id = temp;
-%     zeta_n = fa(zeta_n(2:end),a_array(q),fa_opt);
-% 
-%     temp = 2*ones(size(unzipped_in), 'int8'); temp(end) = 1;
-%     fa_opt.point_id = temp;
-%     [unzipped_in,garbage] = fa(unzipped_in,a_array(q),fa_opt);
-%     [garbage,unzipped_out] = fa(unzipped_out,a_array(q),fa_opt);
-% 
-%     % Now add 0 to the list of zipped_in/out points:
-%     unzipped_in(end+1) = 0;
-%     unzipped_out(end+1) = 0;
-%   end
-% 
-%   %visualize();  
-% end
-%%
 
 %% Terminal map
 if strcmpi(opt.type, 'zipper')
