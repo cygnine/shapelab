@@ -37,11 +37,10 @@ c = a - ia/sin(alpha)*exp(i*alpha);
 p = alpha/pi;
 q = 1-p;
 C = abs(a-c)/(p^p*q^q);
-%Cn = abs(a-c)/(p^p*q^q);
 
-f = @(x) C*(x/Cn/C-p).^p.*(x/Cn/C+q).^q;
+f = @(x) C*((x-c)/Cn/C-p).^p.*((x-c)/Cn/C+q).^q;
 
-w = f(z);
+w = f(z) + c;
 
 % Once again, sometimes we get machine eps crap:
 flags = imag(w)<0;

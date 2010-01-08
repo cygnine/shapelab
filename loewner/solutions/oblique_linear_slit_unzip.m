@@ -68,15 +68,15 @@ M = 150; % Number of Forward-Euler steps to take
 
 % All the regular points:
 if not(isempty(z))
-  w_guess = drive(s, lambda, dlambda, z-c) - lambda(end) + c;
+  w_guess = drive(s, lambda, dlambda, z-c) - lambda(end);
   % Use the above as an initial guess
 
   f = @(x) C*(x-p).^p.*(x+q).^q;
   df = @(x) C*p*(x-p).^(p-1).*(x+q).^q + C*q*(x-p).^p.*(x+q).^(q-1);
-  w = newton((w_guess-c)/C, f, df, 'F', z-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2);
+  w = newton((w_guess)/C, f, df, 'F', z-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2);
 
   troubles = find(abs(f(w)-(z-c))>1e-8);
-  w(troubles) = newton((w_guess(troubles)-c)/C, f, df, 'F', z(troubles)-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2, 'tiptoe', 0.1);
+  w(troubles) = newton((w_guess(troubles))/C, f, df, 'F', z(troubles)-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2, 'tiptoe', 0.1);
 end
 
 % Sometimes imaginary parts get set to -eps
@@ -91,18 +91,18 @@ if slit
   % Negative side
   v0 = -q*ones(size(z_slit));
   v1 = 0*v0;
-  w_slit_left = bisection(v0,v1,f,'F',abs(z_slit)/C);
+  w_slit_left = bisection(v0,v1,f,'F',abs(z_slit-c)/C);
 
   % positive side
   w0 = 0*v0;
   w1 = p*ones(size(w0));
-  w_slit_right = bisection(w0,w1,f,'F',abs(z_slit)/C);
+  w_slit_right = bisection(w0,w1,f,'F',abs(z_slit-c)/C);
 else
   w_slit_left = [];
   w_slit_right = [];
 end
 
 % Normalization
-w = w*(C*Cn);
-w_slit_left = w_slit_left*(C*Cn);
-w_slit_right = w_slit_right*(C*Cn);
+w = w*(C*Cn) + c;
+w_slit_left = w_slit_left*(C*Cn) + c;
+w_slit_right = w_slit_right*(C*Cn) + c;
