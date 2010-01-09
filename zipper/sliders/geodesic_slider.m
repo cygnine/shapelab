@@ -1,7 +1,7 @@
 function[w_n, z_n, mapdata] = geodesic_slider(direction, tooth, z_n, w_n, mapdata)
 % geodesic_slider -- Unzips one tooth using the geodesic algorithm
 %
-% [w_n, z_n, mapdata] = geodesic_slider()
+% [w_n, z_n, mapdata] = geodesic_slider(direction, tooth, z_n, w_n, mapdata)
 
 persistent unzip zipup moebius moebius_inverse
 if isempty(unzip)
@@ -31,13 +31,11 @@ case 'down'
   w_n = moebius(w_n, map);
 
   % Now unzip the perpendicular line segment
-  %[temp, w_n(a_id-1:a_id), z_n(a_id-1:a_id)] = unzip(i*mapdata.tooth_length, ...
-  %                                                   [z_n(1:a_id-2); z_n(a_id+1:end)], z_n(a_id-1:a_id));
   [temp, temp2, temp3] = unzip(i*mapdata.tooth_length, ...
                                [z_n(1:a_id-2); w_n(1:a_id-2); z_n(a_id+1:end)], ...
                                [z_n(a_id-1:a_id); w_n(a_id-1:a_id)]);
 
- % interior pts | 'left' points | 'right' points
+ % interior pts , 'left' points , 'right' points
 
   z_n(1:a_id-2) = temp(1:a_id-2);
   w_n(1:a_id-2) = temp(a_id-1:2*a_id-4);
@@ -50,8 +48,6 @@ case 'down'
 
   z_n(a_id) = 0;
   w_n(a_id) = 0;
-
-
 
 case 'up'
   error('Not yet implemented');

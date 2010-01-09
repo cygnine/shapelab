@@ -27,6 +27,10 @@ if isempty(strict_inputs)
   from shapelab.curves import extend_curve
 end
 
+% Yeah, yeah, matrices are singular. Stop shouting already
+warning off MATLAB:singularMatrix
+warning off MATLAB:nearlySingularMatrix
+
 inputs = {'closed', 'k'};
 defaults = {false, 2};
 opt = strict_inputs(inputs, defaults, [], varargin{:});
@@ -122,6 +126,9 @@ else  % closed curve
 
 end
 
+warning on MATLAB:singularMatrix
+warning on MATLAB:nearlySingularMatrix
+
 %%%%%%%%%%%%%%% Nested functions %%%%%%%%%%%%%%% 
 
 function[] = choose_side()
@@ -139,7 +146,7 @@ function[] = choose_side()
   elseif isnan(k_l(1))
     choose_left = false;
     if isnan(k_r(1))
-      disp('Couldn''t interpolate to either side');
+      %disp('Couldn''t interpolate to either side');
       break_interpolation = true;
     end
   elseif isnan(k_r(1))
@@ -151,6 +158,7 @@ function[] = choose_side()
   end
 
 end
+
 
 function[] = assign_ks()
 % assign_ks -- nested function

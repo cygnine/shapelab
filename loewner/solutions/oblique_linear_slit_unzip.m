@@ -76,7 +76,10 @@ if not(isempty(z))
   w = newton((w_guess)/C, f, df, 'F', z-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2);
 
   troubles = find(abs(f(w)-(z-c))>1e-8);
-  w(troubles) = newton((w_guess(troubles))/C, f, df, 'F', z(troubles)-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2, 'tiptoe', 0.1);
+  if any(troubles)
+    w(troubles) = newton((w_guess(troubles))/C, f, df, 'F', z(troubles)-c, 'fx_tol', 1e-12, 'x_tol', 0, 'maxiter', 1e2, 'tiptoe', 0.1);
+  end
+  w(isinf(z)) = Inf;
 end
 
 % Sometimes imaginary parts get set to -eps

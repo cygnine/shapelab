@@ -36,7 +36,7 @@ while (norm(err)>ftol) & (N_iter < max_iter)
 end
 
 if norm(err)>ftol;
-  fprintf('Failed to converge\n');
+  %fprintf('Failed to converge\n');
   converged = false;
   x = NaN(size(x));
 else

@@ -20,7 +20,7 @@ end
 opt = strict_inputs({'side'}, {true}, [], varargin{:});
 
 z = z(:);
-N_small_steps = 20;
+N_small_steps = 3;
 N = length(k);
 
 if N==1  % Extending a line to a circle is easy:

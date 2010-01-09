@@ -45,3 +45,5 @@ w = f(z) + c;
 % Once again, sometimes we get machine eps crap:
 flags = imag(w)<0;
 w(flags) = real(w(flags));
+
+w(isinf(z)) = Inf;

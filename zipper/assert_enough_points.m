@@ -22,7 +22,7 @@ case 'geodesic'
   N_teeth = N-2;
 case 'slit'
   assert(N>2, 'Error: the slit algorithm requires at least three points');
-  N_teeth = N-3;
+  N_teeth = N-2;
 case 'zipper'
   assert(N>3, 'Error: the zipper algorithm requires at least four points');
   assert(mod(N,2)==0, 'Error: the zipper algorithm requires an even number of points');
@@ -32,7 +32,7 @@ case 'zipper_weld'
   N_teeth = (N-2)/2 - 1;
 case 'loewner'
   assert(N>2, 'Error: the loewner algorithm requires at least three points');
-  N_teeth = N-3;
+  N_teeth = N-2;
 otherwise
   error(['Unrecognized algorithm specification: ' type]);
 end

@@ -1,16 +1,15 @@
 function[mapdata] = unzip_shape(z_n,varargin)
-% construct_map -- `Unzips' a shape via a zipper-type algorithm
+% unzip_shape -- `Unzips' a shape via a zipper-type algorithm
 %
 % [mapdata] = unzip_shape(z_n,{z_in=false,w_in=false,
 %                 z_out=false, w_out=false, winding_number=1,
-%                 zip_magnitude=0.85, type='geodesic'})
+%                 zip_magnitude=0.85, type='geodesic', M=30})
 %
-%     The main workhorse routine for computing a conformal map from the points
-%     z_n to points on the unit circle. 
+%     The main workhorse routine for computing a welding map of a shape.
 %
 %     Output mapdata contains:
 %            a_array
-%            zip_magnitude
+%            moebius_maps
 %            z_in
 %            w_in
 %            z_out
@@ -44,6 +43,9 @@ function[mapdata] = unzip_shape(z_n,varargin)
 %     The option zip_magnitude refers to how each 'base' map is normalized.
 %     Empirically, values O(1) produce stable results.
 %
+%     The option M is the number of sub-steps that a predictive Loewner solver
+%     takes between each shape vertex.
+%
 %     The `type' of mapping can be: 'geodesic', 'slit', 'zipper', or 'loewner'.
 %
 %     A note on normalization: this function normalizes the interior and
@@ -65,8 +67,8 @@ if isempty(input_schema)
 end
 
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
-          'zip_magnitude','type','visualize'};
-defaults = {[], [], Inf, Inf, 1, 0.85, 'geodesic',false};
+          'zip_magnitude','type','visualize', 'M'};
+defaults = {[], [], Inf, Inf, 1, 0.85, 'geodesic',false, 30};
 opt = input_schema(inputs,defaults,[],varargin{:});
 
 mapdata.w_out = opt.w_out;
@@ -76,6 +78,7 @@ mapdata.z_out = opt.z_out;
 mapdata.winding_number = opt.winding_number;
 mapdata.type = opt.type;
 mapdata.tooth_length = opt.zip_magnitude;
+mapdata.M = opt.M;
 
 moebius_maps.H_to_D = [-1, i; ...
                         1, i];  % Just a map from half plane to unit circle.

@@ -1,4 +1,12 @@
 function[new_lambda, dlambda, ds, a, an, g, gn] = compute_driving_step(a, an, g, gn, lambda, q,M);
+% compute_driving_step -- Takes one `step' using a predictive Loewner evolution
+%
+% [new_lambda, dlambda, ds, a, an, g, gn] = compute_driving_step(a, an, g, gn, lambda, q,M);
+%
+%     Evolves the (a,an) and (g,gn) pairs using the product formulation of the
+%     Loewner equation. Lambda is the initial condition for the driving
+%     function, and unzipping for the point a(q+1). M is the number of
+%     `sub-steps' to take to ensure monotonicity of the ODE solver.
 
 persistent invert_a fe
 if isempty(invert_a)

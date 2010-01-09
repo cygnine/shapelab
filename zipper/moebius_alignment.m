@@ -94,7 +94,6 @@ mapdata.moebius_maps.interior_terminal = ...
 
 w_n = moebius(w_n, mapdata.moebius_maps.interior_terminal);
 z_n = moebius(z_n, mapdata.moebius_maps.exterior_terminal);
-%unzipped_out = moebius(unzipped_out,m_out);
 %%
 
 % Finally, map to unit circle
