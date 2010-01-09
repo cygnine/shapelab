@@ -3,7 +3,7 @@
 clear
 close all
 
-load('../../examples/mpeg7_contours.mat');
+load('examples/mpeg7_contours.mat');
 
 % This shape is relatively easy
 samples = mpeg7_contour{5};

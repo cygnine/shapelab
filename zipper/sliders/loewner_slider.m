@@ -27,32 +27,15 @@ case 'down'
   a_id = tooth + 2;
   a = z_n(a_id);
 
-  %gn = [w_n(1:a_id-2); z_n(a_id+1:end)];
-  gn = w_n;
-  %g = [z_n(1:a_id-2); z_n(a_id+1:end)];
-  g = z_n;
-
-  a = compute_a(g, lambda);
-  an = compute_a(gn, lambda);
+  a = compute_a(z_n, lambda);
+  an = compute_a(w_n, lambda);
 
   % Now unzip the slit
-  [lambdan, dlambdan, ds, a, an, g, gn] = unzip(a, an, g, gn, lambda, a_id-1, mapdata.M);
+  [lambdan, dlambdan, ds, a, an, z_n, w_n] = unzip(a, an, z_n, w_n, lambda, a_id-1, mapdata.M);
 
   mapdata.loewner_data.lambda(tooth, :) = lambdan;
   mapdata.loewner_data.dlambda(tooth, :) = dlambdan;
   mapdata.loewner_data.s(tooth, :) = s + cumsum(ds);
-
- % interior pts , 'left' points , 'right' points
-  %z_n(1:a_id-2) = g(1:a_id-2);
-  %w_n(1:a_id-2) = gn(1:a_id-2);
-  z_n = g;
-  w_n = gn;
-
-  %z_n(a_id+1:end) = g(a_id-1:end);
-  %w_n(a_id+1:end) = gn(a_id-1:end);
-
-  %z_n(a_id) = 0;
-  %w_n(a_id) = 0;
 
 case 'up'
   error('Not yet implemented');
