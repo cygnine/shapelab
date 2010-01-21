@@ -1,7 +1,7 @@
 function[w] = normal_linear_slit_zip(a, z)
 % normal_linear_slit_zip -- Zips up a linear slit normal to the real axis
 %
-% [w, w_slit_left, w_slit_right] = normal_linear_slit_zip(a, z)
+% [w] = normal_linear_slit_zip(a, z)
 %
 %     The exact (inverse) solution to the Loewner equation for a linear slit
 %     that is perpendicular to the axis at the location x = real(a).

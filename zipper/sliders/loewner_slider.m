@@ -6,6 +6,7 @@ function[w_n, z_n, mapdata] = loewner_slider(direction, tooth, z_n, w_n, mapdata
 persistent unzip zipup compute_a
 if isempty(unzip)
   from shapelab.loewner import compute_driving_step as unzip
+  %from shapelab.loewner import pointwise_driver as zipup
   from shapelab.loewner import compute_a
 end
 
@@ -38,5 +39,11 @@ case 'down'
   mapdata.loewner_data.s(tooth, :) = s + cumsum(ds);
 
 case 'up'
-  error('Not yet implemented');
+  temp = zipup(mapdata.loewner_data.s(tooth, :), ...
+               mapdata.loewner_data.lambda(tooth, :), ...
+               mapdata.loewner_data.dlambda(tooth, :), ...
+               [z_n; w_n]);
+
+  z_n = temp(1:end/2);
+  w_n = temp((end/2+1):end);
 end

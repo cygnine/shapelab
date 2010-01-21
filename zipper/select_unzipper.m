@@ -5,11 +5,11 @@ function[fcn] = select_unzipper(type)
 
 switch lower(type)
 case 'geodesic'
-  from shapelab.zipper.sliders import geodesic_slider as fcn
+  from shapelab.zipper.sliders import geodesic_unzipper as fcn
 case 'slit'
-  from shapelab.zipper.sliders import slit_slider as fcn
+  from shapelab.zipper.sliders import slit_unzipper as fcn
 case 'loewner'
-  from shapelab.zipper.sliders import loewner_slider as fcn
+  from shapelab.zipper.sliders import loewner_unzipper as fcn
 otherwise
   error('Unrecognized zipper type');
 end

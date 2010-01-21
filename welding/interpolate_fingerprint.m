@@ -1,49 +1,30 @@
-function[varargout] = interpolate_fingerprint(mapdata,varargin)
-% [{theta_int_mapped, theta_ext_mapped}] = interpolate_fingerprint(mapdata,{theta_int=[], theta_ext=[]})
+function[theta_map] = interpolate_fingerprint(mapdata,theta, varargin)
+% interpolate_fingerprint -- Interpolates values of the fingerprint
 %
-% [theta_int_mapped] = interpolate_fingerprint(mapdata, 'theta_int', theta_int)
-% [theta_ext_mapped] = interpolate_fingerprint(mapdata, 'theta_ext', theta_ext)
-% [theta_int_mapped, theta_ext_mapped] = interpolate_fingerprint(mapdata, 'theta_int', theta_int, 'theta_ext', theta_ext)
+% theta_map = interpolate_fingerprint(mapdata, theta, {domain='interior'})
 %
-%     This function 'interpolates' a fingerprint. The first calling syntax
-%     interpolates the values of theta_ext given theta_int. The second syntax
-%     does vice versa. The third does both simultaneously.
+%     This function 'interpolates' a fingerprint. If domain is 'interior', then
+%     the input values theta are assumed to be "interior" values, and they are
+%     mapped to the corresponding exterior values (theta_map) using the welding
+%     map supplied by mapdata. The opposite occurs if domain is set to
+%     'exterior'.
 %
 %     This function doesn't do any 'unwrapping' of angle values; it just spits
 %     out whatever Matlab's angle function gives it. 
 
-persistent input_schema switch_zipper_side
-if isempty(input_schema)
-  from labtools import input_schema
+persistent strict_inputs switch_zipper_side
+if isempty(strict_inputs)
+  from labtools import strict_inputs
   from shapelab.welding import switch_zipper_side
 end
 
-inputs = {'theta_int', 'theta_ext'};
-defaults = {[], []};
+inputs = {'domain'};
+defaults = {'interior'};
 opt = input_schema(inputs, defaults, [], varargin{:});
 
-s_int = size(opt.theta_int);
-s_ext = size(opt.theta_ext);
+theta_size = size(theta);
 
-N_int = prod(s_int);
-N_ext = prod(s_ext);
+z = exp(i*theta(:));
 
-opt.theta_int = opt.theta_int(:);
-opt.theta_ext = opt.theta_ext(:);
-z = [exp(i*opt.theta_int); exp(i*opt.theta_ext)];
-
-point_id = ones([N_int + N_ext, 1]);
-if N_ext>0
-  point_id(N_int+1:end) = 2;
-end
-
-out = switch_zipper_side(z, mapdata,'point_id', point_id);
-
-if N_int==0;
-  varargout{1} = reshape(angle(out(N_int+1:end)), s_ext);
-elseif N_ext==0;
-  varargout{1} = reshape(angle(out(1:N_int)), s_int);
-else
-  varargout{1} = reshape(angle(out(1:N_int)), s_int);
-  varargout{2} = reshape(angle(out(N_int+1:end)), s_ext);
-end
+theta_map = switch_zipper_side(z, mapdata, opt);
+theta_map = reshape(angle(theta_map), theta_size);

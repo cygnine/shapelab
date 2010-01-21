@@ -1,54 +1,54 @@
-function[w_n, z_n, mapdata] = geodesic_slider(direction, tooth, z_n, w_n, mapdata)
+function[z] = geodesic_slider(direction, tooth, z, mapdata, interior, slit_interior, slit_exterior)
 % geodesic_slider -- Unzips one tooth using the geodesic algorithm
 %
-% [w_n, z_n, mapdata] = geodesic_slider(direction, tooth, z_n, w_n, mapdata)
+% [z] = geodesic_slider(direction, tooth, z, mapdata, ...
+%          interior, slit_interior, slit_exterior)
+%
+%     The three final inputs are mutually exclusive boolean flags that
+%     determine how each point z is treated:
+%
+%       interior==true ----> z is somewhere in the interior, no special treatment
+%                            is necessary.
+%       slit_interior==true ----> z lies on the slit, on the interior part
+%       slit_exterior==true ----> z lies on the slit, on the exterior part
+%
+%       direction -- either 'unzip' or 'zipup'
+%
+%     If the three final inputs are omitted, the default is to treat all points
+%     as interior points.
 
 persistent unzip zipup moebius moebius_inverse
 if isempty(unzip)
-  from shapelab.loewner.solutions import normal_linear_slit_unzip as unzip
+  from shapelab.loewner.solutions import normal_linear_slit_unzip_wrapper as unzip
   from shapelab.loewner.solutions import normal_linear_slit_zip as zipup
   from shapelab.common import moebius moebius_inverse
 end
 
 switch direction
-case 'down'
-  if tooth==1 % Then initialize data array
-    N = length(z_n) - 3;
-    mapdata.a_array = zeros([N-1 1]);
+case 'unzip'
+  if nargin<5
+    interior = true(size(z));
+    slit_exterior = ~interior;
+    slit_interior = slit_exterior;
   end
 
-  a_id = tooth + 2;
-  a = z_n(a_id);
-  mapdata.a_array(tooth) = a;
-
-  b = abs(a)^2/real(a);  % The point on real axis that the next map sends to infinity
-  c = abs(a)^2/imag(a);  % The image of a after the map
-
-  % Use a moebius map m to send the circular arc 0 -- a to the perpendicular line 
-  % 0 -- mapdata.tooth_length/c
+  a = mapdata.a_array(tooth);
+  b = abs(a)^2/real(a);  
+  c = abs(a)^2/imag(a); 
   map = [mapdata.tooth_length/c 0; -1/b 1];
-  z_n = moebius(z_n, map);
-  w_n = moebius(w_n, map);
 
-  % Now unzip the perpendicular line segment
-  [temp, temp2, temp3] = unzip(i*mapdata.tooth_length, ...
-                               [z_n(1:a_id-2); w_n(1:a_id-2); z_n(a_id+1:end)], ...
-                               [z_n(a_id-1:a_id); w_n(a_id-1:a_id)]);
+  z = moebius(z, map);
 
- % interior pts , 'left' points , 'right' points
+  [z(interior), z(slit_interior), z(slit_exterior)] = ...
+    unzip(i*mapdata.tooth_length, z(interior), z(slit_interior), z(slit_exterior));
 
-  z_n(1:a_id-2) = temp(1:a_id-2);
-  w_n(1:a_id-2) = temp(a_id-1:2*a_id-4);
+case 'zipup'
+  a = mapdata.a_array(tooth);
+  b = abs(a)^2/real(a);
+  c = abs(a)^2/imag(a);  
+  map = [mapdata.tooth_length/c 0; -1/b 1];
 
-  z_n(a_id+1:end) = temp(2*a_id-3:end);
-  w_n(a_id+1:end) = temp(2*a_id-3:end);
+  z = zipup(i*mapdata.tooth_length,z); 
 
-  z_n(a_id-1:a_id) = temp3(1:2);
-  w_n(a_id-1:a_id) = temp2(3:4);
-
-  z_n(a_id) = 0;
-  w_n(a_id) = 0;
-
-case 'up'
-  error('Not yet implemented');
+  z = moebius_inverse(z, map);
 end

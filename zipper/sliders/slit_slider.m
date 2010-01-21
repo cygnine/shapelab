@@ -1,7 +1,8 @@
-function[w_n, z_n, mapdata] = slit_slider(direction, tooth, z_n, w_n, mapdata)
-% slit_slider -- Unzips one tooth using the slit algorithm
+function[z] = slit_slider(direction, tooth, z, mapdata, interior, slit_interior, slit_exterior)
+% slit_slider -- The discretized elementary conformal map using the slit algorithm
 %
-% [w_n, z_n, mapdata] = slit_slider(direction, tooth, z_n, w_n, mapdata)
+% [z] = slit_slider(direction, tooth, z, mapdata, ...
+%         interior, slit_interior, slit_exterior)
 
 persistent unzip zipup 
 if isempty(unzip)
@@ -10,21 +11,20 @@ if isempty(unzip)
 end
 
 switch direction
-case 'down'
-  if tooth==1 % Then initialize data array
-    N = length(z_n) - 3;
-    mapdata.a_array = zeros([N-1 1]);
-    mapdata.a_angle = zeros([N-1 1]);
+case 'unzip'
+  if nargin<5
+    interior = true(size(z));
+    slit_interior = ~interior;
+    slit_exterior = slit_interior;
   end
 
-  a_id = tooth + 2;
-  a = z_n(a_id);
-  mapdata.a_array(tooth) = a;
-  mapdata.a_angle(tooth) = angle(a);
+  a = mapdata.a_array(tooth);
 
-  [temp, temp2, temp3] = unzip(a, angle(a), ...
-                               [z_n(1:a_id-2); w_n(1:a_id-2); z_n(a_id+1:end)], ...
-                               [z_n(a_id-1:a_id); w_n(a_id-1:a_id)]);
+  [z(interior), z(slit_interior), garbage] = ...
+    unzip(a, angle(a), z(interior), z(slit_interior));
+
+  [garbage, garbage, z(slit_exterior)] = ...
+    unzip(a, angle(a), [], z(slit_exterior));
 
  % interior pts , 'left' points , 'right' points
 
@@ -41,5 +41,8 @@ case 'down'
   w_n(a_id) = 0;
 
 case 'up'
-  error('Not yet implemented');
+  a = mapdata.a_array(tooth);
+  temp = zipup(a, angle(a), [z_n; w_n]);
+  z_n = temp(1:end/2);
+  w_n = temp((end/2+1):end);
 end

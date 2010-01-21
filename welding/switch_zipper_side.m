@@ -1,22 +1,23 @@
 function[z] = switch_zipper_side(z,mapdata,varargin)
-% [z]= switch_zipper_side(z,mapdata,{point_id=ones(size(w))})
+% [z]= switch_zipper_side(z,mapdata,{domain='interior'})
 %
 %     'Switches' the side of the zipper that the points z lie on. I.e., in
 %     geometric language, this function zips ups the boundary points z according
 %     to the map mapdata. It then unzips them again, but switches the side of
 %     the zipper that the points lie on. In practice, this maps the unit circle
 %     to the unit circle and is the fingerprint of the map. The optional input
-%     point_id specifies the starting side of the points z.
+%     domain specifies the starting side of the points z ('interior' or
+%     'exterior').
 %
-%     z(point_id==1) -----> (default) points on the interior boundary of the
-%     unit disc that you want to map onto the exterior.
+%     domain == 'interior' -----> (default) points on the interior boundary of
+%     the unit disc that you want to map onto the exterior.
 %
-%     z(point_id==2) -----> points on the exterior boundary of the unit disc
-%     that you want to map onto the interior.
+%     domain == 'exterior' -----> points on the exterior boundary of the unit
+%     disc that you want to map onto the interior.
 
-persistent input_schema moebius moebius_inv csqrt zip
+persistent strict_inputs moebius moebius_inv csqrt zip
 if isempty(input_schema)
-  from labtools import input_schema
+  from labtools import strict_inputs
   from shapelab.common import moebius
   from shapelab.common import moebius_inverse as moebius_inv
   from shapelab.common import positive_angle_square_root as csqrt

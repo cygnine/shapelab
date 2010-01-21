@@ -35,3 +35,5 @@ for q = 1:M
   i2 = q*N;
   z(i1:i2) = r*theta(q);
 end
+
+z = reshape(z, [N M]);

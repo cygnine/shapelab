@@ -62,7 +62,9 @@ if isempty(input_schema)
   from labtools import input_schema
   from shapelab.common import moebius 
   from shapelab.zipper.drivers import visualize
-  from shapelab.zipper import initial_map terminal_map assert_enough_points
+  from shapelab.zipper import assert_enough_points
+  from shapelab.zipper import calculate_initial_map as initial_map
+  from shapelab.zipper import calculate_terminal_map as terminal_map
   from shapelab.zipper import select_unzipper moebius_alignment
 end
 
@@ -101,12 +103,11 @@ visdata = initialize_visualization();
 visdata.visualize = opt.visualize;
 
 %% Initialization for looping over teeth
-fa_opt.cut_magnitude = opt.zip_magnitude;
-slide = select_unzipper(opt.type);
+unzip = select_unzipper(opt.type);
 
 % Loop over teeth:
 for q = 1:N_teeth
-  [w_n, z_n, mapdata] = slide('down', q, z_n, w_n, mapdata);
+  [w_n, z_n, mapdata] = unzip(q, z_n, w_n, mapdata);
   visualize(z_n(q+2:end-3), w_n(1:q+2), z_n(1:q+2), visdata);
 end
 

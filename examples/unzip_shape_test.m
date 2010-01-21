@@ -6,7 +6,7 @@ close all
 load('examples/mpeg7_contours.mat');
 
 % This shape is relatively easy
-samples = mpeg7_contour{5};
+samples = mpeg7_contour{514};
 
 % As usual, slit messes up. Each of the following two screw slit up (for N=150).
 % However, both geodesic and loewner power through.
@@ -30,3 +30,6 @@ plot(unwrap(angle(loewner_map.vertices_in)), unwrap(angle(loewner_map.vertices_o
 
 title('Welding map');
 legend('Geodesic', 'Slit', 'Loewner');
+
+% Let's try interpolating fingerprints
+theta_in = linspace(0, 2*pi, 100);
