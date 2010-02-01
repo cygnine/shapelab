@@ -16,17 +16,18 @@ from shapelab.common import polar_linspace
 samples = mpeg7_contour{54};
 % For this shape:
 z_in = 100+150*i;
-z_in = 350+100*i;
-z_in = 360+20*i;
+%z_in = 350+100*i;
+%z_in = 360+20*i;
+z_in = 350 + 175*i;
 w_in = 0;
 
 N = 150;
 z = downsample_points(samples, N);
-z = circshift(z, 102);
+%z = circshift(z, 85);
 
 mapdata = unzip_shape(z, 'w_in', w_in, 'z_in', z_in);
 
-w = polar_linspace(40, 40, 'r0', 0.01, 'r1', 1);
+w = polar_linspace(40, 120, 'r0', 0.01, 'r1', 1);
 wz = backward_map(w, mapdata);
 
 w_circ = exp(i*linspace(0, 2*pi, 1e4).');
