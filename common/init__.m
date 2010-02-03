@@ -4,3 +4,4 @@ function[common] = init__()
 % [nodes] = init__()
 
 common = recurse_files(pwd);
+common.moebius_maps = matlab_import('moebius_maps');

@@ -1,7 +1,8 @@
 function[z] = inverse_terminal_map(z, mapdata, interior, slit_interior, slit_exterior)
 % inverse_terminal_map -- The inverse terminal map for zipper-type algorithms
 %
-% [z] = inverse_terminal_map(z, mapdata, {interior, slit_interior, slit_exterior})
+% [z] = inverse_terminal_map(z, mapdata, [[interior, slit_interior,
+% slit_exterior]])
 %
 %     Performs the inverse of the termnal map for zipper-type algorithms. The
 %     optional inputs are all indicial or boolean indexing arrays. 
