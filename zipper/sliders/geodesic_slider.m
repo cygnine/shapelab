@@ -15,7 +15,8 @@ function[z] = geodesic_slider(direction, tooth, z, mapdata, interior, slit_inter
 %       direction -- either 'unzip' or 'zipup'
 %
 %     If the three final inputs are omitted, the default is to treat all points
-%     as interior points.
+%     as interior points. When the three final inputs are given, no operations
+%     are performed on elements of z that are not indexed.
 
 persistent unzip zipup moebius moebius_inverse
 if isempty(unzip)
@@ -32,12 +33,14 @@ case 'unzip'
     slit_interior = slit_exterior;
   end
 
+  allz = interior | slit_exterior | slit_interior;
+
   a = mapdata.a_array(tooth);
   b = abs(a)^2/real(a);  
   c = abs(a)^2/imag(a); 
   map = [mapdata.tooth_length/c 0; -1/b 1];
 
-  z = moebius(z, map);
+  z(allz) = moebius(z(allz), map);
 
   [z(interior), z(slit_interior), z(slit_exterior)] = ...
     unzip(i*mapdata.tooth_length, z(interior), z(slit_interior), z(slit_exterior));
@@ -48,7 +51,12 @@ case 'zipup'
   c = abs(a)^2/imag(a);  
   map = [mapdata.tooth_length/c 0; -1/b 1];
 
-  z = zipup(i*mapdata.tooth_length,z); 
-
-  z = moebius_inverse(z, map);
+  if nargin<5
+    z = zipup(i*mapdata.tooth_length,z); 
+    z = moebius_inverse(z, map);
+  else
+    allz = interior | slit_interior | slit_exterior;
+    z(allz) = zipup(i*mapdata.tooth_length,z(allz)); 
+    z(allz) = moebius_inverse(z(allz), map);
+  end
 end

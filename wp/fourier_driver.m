@@ -11,4 +11,4 @@ if isempty(ffft)
   from speclab.fourier.fft import ffft_online as ffft
 end
 
-WP = sum(norm_stuff.mode_weights.*abs(ffft(fx, norm_stuff.fft_data)).^2);
+WP = norm_stuff.mode_weights*abs(ffft(fx, norm_stuff.fft_data)).^2;

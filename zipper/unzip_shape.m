@@ -65,7 +65,8 @@ if isempty(input_schema)
   from shapelab.zipper import assert_enough_points
   from shapelab.zipper import calculate_initial_map as initial_map
   from shapelab.zipper import calculate_terminal_map as terminal_map
-  from shapelab.zipper import select_unzipper moebius_alignment
+  from shapelab.zipper import select_unzipper
+  from shapelab.zipper import calculate_moebius_alignment as moebius_alignment
 end
 
 inputs = {'z_in', 'w_in', 'z_out', 'w_out', 'winding_number',...
