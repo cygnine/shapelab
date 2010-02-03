@@ -1,11 +1,11 @@
 function[phi_out, phi_in] = interpolate_weld(mapdata, varargin)
 % interpolate_weld -- Interpolates a welding map
 %
-% [phi_out, phi_in] = interpolate_weld(mapdata, {theta_in=[], theta_out=[]})
+% [phi_out, phi_in] = interpolate_weld(mapdata, {theta_int=[], theta_ext=[]})
 %
 %     Interpolates the welding map specified by mapdata. At this stage, only
-%     `geodesic'-type maps are supported. The points theta_in are transferred
-%     via the weld to phi_out, and the points theta_out are transferred to
+%     `geodesic'-type maps are supported. The points theta_int are transferred
+%     via the weld to phi_out, and the points theta_ext are transferred to
 %     phi_in.
 
 persistent strict_inputs zip moebius 
@@ -15,24 +15,24 @@ persistent terminal_map moebius_alignment
 if isempty(strict_inputs)
   from labtools import strict_inputs
   from shapelab.common import moebius 
-  from shapelab.zipper import inverse_initial_map inverse_terminal_map assert_enough_points
-  from shapelab.zipper import select_slider inverse_moebius_alignment
-  from shapelab.zipper import terminal_map moebius_alignment
+  from shapelab.zipper import select_slider assert_enough_points
+  from shapelab.zipper.drivers import inverse_initial_map inverse_terminal_map inverse_moebius_alignment
+  from shapelab.zipper.drivers import terminal_map moebius_alignment
 end
 
-opt = strict_inputs({'theta_in', 'theta_out'}, {[], []}, [], varargin{:});
+opt = strict_inputs({'theta_int', 'theta_ext'}, {[], []}, [], varargin{:});
 
 % Miscellaneous preprocessing
-map_to_exterior=true; exterior_size = size(opt.theta_out); 
-opt.theta_out = opt.theta_out(:); N_exterior = length(opt.theta_out);
-map_to_interior=true; interior_size = size(opt.theta_in); 
-opt.theta_in = opt.theta_in(:); N_interior = length(opt.theta_in);
+map_to_exterior=true; exterior_size = size(opt.theta_ext); 
+opt.theta_ext = opt.theta_ext(:); N_exterior = length(opt.theta_ext);
+map_to_interior=true; interior_size = size(opt.theta_int); 
+opt.theta_int = opt.theta_int(:); N_interior = length(opt.theta_int);
 
 % First figure out if we're doing interior to exterior or vice versa, etc.
-if isempty(opt.theta_in)
+if isempty(opt.theta_int)
   map_to_exterior=false;
 end
-if isempty(opt.theta_out)
+if isempty(opt.theta_ext)
   map_to_interior=false;
 end
 
@@ -42,7 +42,7 @@ if not(map_to_interior | map_to_exterior)
 end
 
 % Invert the Moebius alignment
-[z_interior, z_exterior] = inverse_moebius_alignment(exp(i*opt.theta_in), exp(i*opt.theta_out), mapdata);
+[z_interior, z_exterior] = inverse_moebius_alignment(exp(i*opt.theta_int), exp(i*opt.theta_ext), mapdata);
 [vertices_int, vertices_ext] = inverse_moebius_alignment(mapdata.vertices_in, mapdata.vertices_out, mapdata);
 
 
@@ -54,7 +54,7 @@ N_vertices = length(vertices_int);
 
 if map_to_exterior
   z_interior = real(z_interior);
-  z_interior(abs(mod(opt.theta_in,2*pi))<1e-14) = -Inf;
+  z_interior(abs(mod(opt.theta_int,2*pi))<1e-14) = -Inf;
   [z_interior, sort_order_interior] = sort(z_interior); 
   [bin_count_int, bin_id_int] = histc(z_interior, [vertices_int; Inf]);
   bin_count_int(1) = bin_count_int(1) + bin_count_int(end);
@@ -65,7 +65,7 @@ else
 end
 if map_to_interior
   z_exterior = real(z_exterior);
-  z_exterior(abs(mod(opt.theta_out,2*pi))<1e-14) = -Inf;
+  z_exterior(abs(mod(opt.theta_ext,2*pi))<1e-14) = -Inf;
   [z_exterior, sort_order_exterior] = sort(z_exterior); 
   [bin_count_ext, bin_id_ext] = histc(z_exterior, [vertices_ext; Inf]);
   bin_count_ext(1) = bin_count_ext(1) + bin_count_ext(end);
@@ -80,8 +80,7 @@ max_tooth = min([bin_id_int; bin_id_ext]);
 
 z = [z_interior; z_exterior];
 null_ind = false(size(z));
-null_ind(bin_id_ext==N_vertices) = true;
-null_ind(bin_id_int==N_vertices) = true;
+null_ind = [bin_id_int==N_vertices; bin_id_ext==N_vertices];
 interior_ind = null_ind; interior_ind(1:N_interior) = true;
 interior_ind(null_ind) = false;
 exterior_ind = null_ind; exterior_ind(N_interior+1:end) = true;

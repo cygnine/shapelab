@@ -11,7 +11,8 @@ close all
 load('examples/mpeg7_contours.mat');
 from shapelab.test_shapes import downsample_points
 from shapelab.zipper import unzip_shape backward_map interpolate_weld
-from shapelab.common import polar_linspace
+from shapelab.common import polar_linspace 
+from labtools import interval_wrap
 
 samples = mpeg7_contour{54};
 % For this shape:
@@ -39,6 +40,16 @@ wvz = backward_map(wv, mapdata, 'point_id', true(size(wv)));
 %plot(wz, 'r-'); hold on; plot(wvz, 'r-'); plot(wz_circ, 'g.-'); plot(z, 'b.')
 %plot(z(1), 'kx');
 
+interval = [0, 2*pi];
+
 % Now interpolate the fingerprint
+tin = linspace(0, 2*pi, 1000);
 tout = linspace(0, 2*pi, 1000);
-[garbage, tin] = interpolate_weld(mapdata, 'theta_out', tout);
+[phi_tin, phi_tout] = interpolate_weld(mapdata, 'theta_int', tin, 'theta_ext', tout);
+[phi_tin2, garbage] = interpolate_weld(mapdata, 'theta_int', tin);
+
+plot(interval_wrap(tin, interval), interval_wrap(phi_tin, interval), 'b.'); 
+hold on;
+plot(interval_wrap(phi_tout, interval), interval_wrap(tout, interval), 'b.');
+plot(interval_wrap(angle(mapdata.vertices_in), interval),...
+     interval_wrap(angle(mapdata.vertices_out), interval), 'r.')

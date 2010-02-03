@@ -25,8 +25,8 @@ persistent inverse_initial_map inverse_terminal_map assert_enough_points select_
 if isempty(strict_inputs)
   from labtools import strict_inputs
   from shapelab.common import moebius 
-  from shapelab.zipper import inverse_initial_map inverse_terminal_map assert_enough_points
-  from shapelab.zipper import select_slider inverse_moebius_alignment
+  from shapelab.zipper import select_slider assert_enough_points 
+  from shapelab.zipper.drivers import inverse_initial_map inverse_terminal_map inverse_moebius_alignment
 end
 
 zsize = size(z);
