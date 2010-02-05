@@ -17,7 +17,12 @@ if isempty(moebius_inverse)
 end
 
 if isinf(z1) | isinf(z2)
-  A = isfinite(z1)*z1 + isfinite(z2)*z2; % pick whichever is finite
+  if isfinite(z1)  % Elegent boolean indexing doesn't do 0*Inf. Boo.
+    A = z1;
+  else
+    A = z2;
+  end
+  %A = isfinite(z1)*z1 + isfinite(z2)*z2; % pick whichever is finite
 
   c = 2*A/(1-i);
   b = i*c;

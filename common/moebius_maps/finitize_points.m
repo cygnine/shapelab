@@ -8,14 +8,16 @@ function[points, map] = finitize_points(points)
 %     points is the collection of points that have been rotated to be finite,
 %     and the matrix Moebius map is the second output.
 
-persistent moebius
+persistent moebius map_infinity_to
 if isempty(moebius)
   from shapelab.common import moebius
+  from shapelab.common.moebius_maps import map_infinity_to
 end
 
 tol = 1e16;
-if any(abs(points)>tol)
-  error('Your points are too Herculean in magnitude...please redefine my tolerance');
+if all(abs(points)<tol)
+  map = eye(2);
+  return
 end
 
 sample_points = [0, 1, -1, 2:100];
@@ -32,6 +34,7 @@ while q<=N_sample_points
     done = true;
     break
   end
+  q = q+1;
 end
 
 if done

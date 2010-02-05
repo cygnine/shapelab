@@ -59,4 +59,4 @@ else  % Then guess (1) is right -- proceed to invert system
   H = [coeffs(1) coeffs(2); 1 coeffs(3)];
 end
 
-H = pre_map*H*post_map;
+H = post_map*H*pre_map;

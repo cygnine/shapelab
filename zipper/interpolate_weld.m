@@ -168,5 +168,5 @@ end
 [z_exterior, z_interior] = moebius_alignment(z_exterior, z_interior, mapdata);
 
 % We're done
-phi_out = angle(z_interior);  % These have been mapped to the exterior
-phi_in = angle(z_exterior);   % These have been mapped to the interior
+phi_out = reshape(angle(z_interior), interior_size);  % These have been mapped to the exterior
+phi_in = reshape(angle(z_exterior), exterior_size);   % These have been mapped to the interior

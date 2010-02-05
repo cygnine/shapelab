@@ -17,7 +17,6 @@ if image==0
   H = [0 1; 1 0]; 
   return
 end
-  
 
 % First find the conjugate points to the geodesic
 [mu, nu] = conjugate_points(image, Inf);
