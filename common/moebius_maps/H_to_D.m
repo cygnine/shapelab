@@ -1,4 +1,4 @@
-function[H] = D_to_H(varargin)
+function[H] = D_to_H()
 % D_to_H -- Maps the disc to the upper-half plane
 %
 % H = D_to_H()

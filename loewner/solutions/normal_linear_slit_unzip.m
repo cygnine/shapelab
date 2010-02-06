@@ -27,9 +27,10 @@ function[w, w_slit_left, w_slit_right] = normal_linear_slit_unzip(a, z, varargin
 %     If you just want to evaluate the map for points on the slit, set the
 %     mandatory input z to the empty array ([]).
 
-persistent cexp
+persistent cexp bsign
 if isempty(cexp)
   from shapelab.common import positive_angle_exponential as cexp
+  from labtools import biased_sign as bsign
 end
 
 if nargin>2
@@ -49,7 +50,7 @@ if not(isempty(z))
   nreals = not(reals);
 
   if any(reals)
-    w(reals) = sign(z(reals)-ra).*sqrt((z(reals)-ra).^2 + ia^2) + ra;
+    w(reals) = bsign(z(reals)-ra).*sqrt((z(reals)-ra).^2 + ia^2) + ra;
   end
 
   if any(nreals)
