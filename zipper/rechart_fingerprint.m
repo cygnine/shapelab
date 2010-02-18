@@ -1,22 +1,21 @@
-function[vertices_int, vertices_ext] = rechart_fingerprint(vertices_int, vertices_ext, theta_int, theta_ext);
+function[vertices_int, vertices_ext,M] = rechart_fingerprint(vertices_int, vertices_ext, theta_int, theta_ext);
 % rechart_fingerprint -- Recharts a fingerprint
 %
-% [vertices_int, vertices_ext] = rechart_fingerprint(vertices_int, vertices_ext, theta_int, theta_ext)
+% [vertices_int, vertices_ext,M] = rechart_fingerprint(vertices_int, vertices_ext, theta_int, theta_ext)
 %
 %     Given point values (vertices_int, vertices_ext) that define a fingerprint,
 %     this function applies an interior Moebius map to the fingerprint so that
 %     (theta_int(i), theta_ext(i)) is a point on the fingerprint for each i =
-%     1,2,3.
+%     1,2,3. The Moebius map M that is output is the rechart ID.
 %
 %     Right now this is only done over [0, 2*pi]. I'm in no mood currently to do
 %     bean counting.
 
-persistent interp_fprint find_moebius moebius wrap
+persistent interp_fprint find_moebius apply_rechart
 if isempty(interp_fprint)
   from shapelab.zipper import interpolate_fingerprint as interp_fprint
   from shapelab.common.moebius_maps import specify_points as find_moebius
-  from shapelab.common import moebius
-  from labtools import interval_wrap as wrap
+  from shapelab.zipper import apply_rechart
 end
 
 % First send theta_ext through the fingerprint, and use a Moebius map to take
@@ -30,4 +29,5 @@ M = find_moebius(z1, z2);
 
 interval = [0, 2*pi];
 
-vertices_int = wrap(angle(moebius(exp(i*vertices_int), M)), interval);
+%vertices_int = wrap(angle(moebius(exp(i*vertices_int), M)), interval);
+[vertices_int,vertices_ext] = apply_rechart(vertices_int, vertices_ext, M);

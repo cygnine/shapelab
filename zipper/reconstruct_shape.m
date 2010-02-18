@@ -1,42 +1,30 @@
-function[psi_out, psi_in] = interpolate_fingerprint(vertices_int, vertices_ext, varargin)
-% interpolate_fingerprint -- Interpolates a fingerprint
+function[z_vertices, mapdata,z] = reconstruct_shape(vertices_int, vertices_ext, varargin)
+% reconstruct_shape -- Reconstructs shape samples from a fingerprint
 %
-% [psi_out, psi_in] = interpolate_fingerprint(vertices_int, vertices_ext,
-% {theta_int=[], theta_ext=[]})
+% [z_vertices, mapdata,z] = reconstruct_shape(vertices_int,
+% vertices_ext {theta_int=[], theta_ext=[]}
 %
-%     Interpolates a fingerprint using the given (vertices_int,
-%     vertices_ext) pairs. These are assumed to come from a function over a
-%     2*pi-length domain *that is monotonic*. 
-%
-%     The fingerprint psi satisfies psi(theta+2*pi) = psi(theta) + 2*pi. The
-%     fingerprint is defined as 
-%
-%        psi = inv(phi_ext) o phi_int,
-%
-%     where phi_int (phi_ext) is a map of the interior (exterior) of the disc to
-%     the interior (exterior) of a shape. 
-%
-%     The input theta_int are angles on the interior of the unit disc and get
-%     mapped via the weld to the external values psi_out. theta_ext and psi_in
-%     form a similar pair.
-%
-% Assumptions: 
-%
-%    - The shape has a positive winding number
-%    - No chart computations
-%    - Geodesic tooth-length of 0.1
+%     Using point values of a fingerprint, this function reconstructs samples
+%     from a shape. It makes assumptions about the kind of zipper map in order
+%     to reconstruct a shape. The point values (vertices_int,
+%     vertices_ext) represents the fingerprint. The optional inputs theta_int
+%     and theta_ext are samples from [0, 2*pi] that are points on the
+%     interior/exterior of the unit circle that get mapped back onto the
+%     shape. The output vector z is the vertical concatenation of the images of
+%     theta_int and theta_ext.
 
-persistent wrap strict_inputs find_moebius moebius moebius_inverse
+persistent wrap strict_inputs find_moebius moebius moebius_inverse inverse_map
 persistent force_inverse_terminal_map zipup unzip terminal_map fd
 if isempty(strict_inputs)
   from labtools import strict_inputs
   from labtools import interval_wrap as wrap
   from shapelab.common.moebius_maps import specify_points as find_moebius
+  from shapelab.common.moebius_maps import inverse_map
   from shapelab.common import moebius moebius_inverse
   from shapelab.zipper.drivers import force_inverse_terminal_map terminal_map
   from shapelab.loewner.solutions import normal_linear_slit_zip as zipup
   from shapelab.loewner.solutions import normal_linear_slit_unzip as unzip
-  from finite_difference import difference_derivative as fd
+  from finite_difference import difference_derivative_periodic as fd
 end
 
 N_vertices = length(vertices_int);
@@ -51,7 +39,9 @@ assumptions.N_teeth = N_vertices - 2;
 
 opt = strict_inputs({'theta_int', 'theta_ext'}, {[], []}, [], varargin{:});
 map_to_interior = not(isempty(opt.theta_ext));
+N_exterior = length(opt.theta_ext);
 map_to_exterior = not(isempty(opt.theta_int));
+N_interior = length(opt.theta_int);
 
 vertices_int = vertices_int(:);
 vertices_ext = vertices_ext(:);
@@ -60,8 +50,7 @@ vertices_ext = vertices_ext(:);
 %% Preprocessing: make the first map the `best-resolved' one
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Find approximations to derivative
-dapprox = fd(vertices_int, vertices_ext, 2);
-
+dapprox = fd(vertices_int, vertices_ext, 2, [vertices_int(1) ,2*pi + vertices_int(1)]);
 % Make point 1 the location with the smallest abs(log(|f'|))
 [garbage, ground_zero] = min(abs(log(abs(dapprox))));
 
@@ -80,9 +69,6 @@ psi_in_size = size(opt.theta_ext);
 opt.theta_int = wrap(opt.theta_int(:), interval);
 opt.theta_ext = wrap(opt.theta_ext(:), interval);
 
-N_interior = length(opt.theta_int);
-N_exterior = length(opt.theta_ext);
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Moebius alignment here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,8 +84,17 @@ middle_index = mod(ground_zero + floor(N_vertices/2) - 1, N_vertices) + 1;
 % Perform alignment: wrap fingerprint so that vertices(1) ---> (0,0)
 vertices_int = exp(i*vertices_int);
 vertices_ext = exp(i*vertices_ext);
+%z = [exp(i*opt.theta_int); exp(i*opt.theta_ext)];
 opt.theta_int = exp(i*opt.theta_int);
 opt.theta_ext = exp(i*opt.theta_ext);
+
+% We will keep track of 0 and Inf
+point_0 = 0;
+point_inf = Inf;
+
+assumptions.vertices_in = vertices_int;
+assumptions.vertices_out = vertices_ext;
+
 H_int = eye(2);
 H_ext = eye(2);
 
@@ -113,9 +108,16 @@ H_ext = find_moebius([vertices_ext(1) vertices_ext(end) middle_point_ext], ...
                      [Inf,            0,                -1]);
 
 vertices_int = real(moebius(vertices_int, H_int));
-opt.theta_int = real(moebius(opt.theta_int, H_int));
+%opt.theta_int = real(moebius(opt.theta_int, H_int));
 vertices_ext = real(moebius(vertices_ext, H_ext));
-opt.theta_ext = real(moebius(opt.theta_ext, H_ext));
+%opt.theta_ext = real(moebius(opt.theta_ext, H_ext));
+z = [moebius(vertices_int, H_int); moebius(vertices_ext, H_ext)];
+point_0 = moebius(point_0, H_int);
+point_inf = moebius(point_inf, H_ext);
+
+assumptions.moebius_maps.interior_terminal = inverse_map(H_int);
+assumptions.moebius_maps.exterior_terminal = inverse_map(H_ext);
+anyz = not(isempty(z));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Get ready for zippering
@@ -125,75 +127,70 @@ vertices_ext(1) = -Inf;
 vertices_int(end) = 0;
 vertices_ext(end) = 0;
 
-% WTF was this about?
 %tol = 1e-14;
 %opt.theta_int(abs(opt.theta_int)<tol) = Inf;
 %opt.theta_ext(abs(opt.theta_ext)<tol) = Inf;
-
 % Do you want to make sure z(supposed_to_be_inf) = -Inf?
-[opt.theta_int, sort_order_interior] = sort(opt.theta_int);
-[opt.theta_ext, sort_order_exterior] = sort(opt.theta_ext);
+%[opt.theta_int, sort_order_interior] = sort(opt.theta_int);
+%[opt.theta_ext, sort_order_exterior] = sort(opt.theta_ext);
 
-if map_to_exterior
-  [bin_count_int, bin_id_int] = histc(opt.theta_int, [vertices_int; Inf]);
-  bin_count_int(1) = bin_count_int(1) + bin_count_int(end);
-  bin_count_int(end) = [];
-  bin_id_int(bin_id_int==(N_vertices+1))=1;
-else
-  bin_id_int = [];
-end
-if map_to_interior
-  [bin_count_ext, bin_id_ext] = histc(opt.theta_ext, [vertices_ext; Inf]);
-  bin_count_ext(1) = bin_count_ext(1) + bin_count_ext(end);
-  bin_count_ext(end) = [];
-  bin_id_ext(bin_id_ext==(N_vertices+1)) = 1;
-else
-  bin_id_ext = [];
-end
+%if map_to_exterior
+%  [bin_count_int, bin_id_int] = histc(opt.theta_int, [vertices_int; Inf]);
+%  bin_count_int(1) = bin_count_int(1) + bin_count_int(end);
+%  bin_count_int(end) = [];
+%  bin_id_int(bin_id_int==(N_vertices+1))=1;
+%else
+%  bin_id_int = [];
+%end
+%if map_to_interior
+%  [bin_count_ext, bin_id_ext] = histc(opt.theta_ext, [vertices_ext; Inf]);
+%  bin_count_ext(1) = bin_count_ext(1) + bin_count_ext(end);
+%  bin_count_ext(end) = [];
+%  bin_id_ext(bin_id_ext==(N_vertices+1)) = 1;
+%else
+%  bin_id_ext = [];
+%end
 
 % bin_id == q -----> point lies on slit between vertices(q) and vertices(q+1)
 % For a geodesic map, there are (N_vertices - 2) slits -- the first two vertices
 % are connected via a circular arc, as are the last vertex and the first vertex.
 
-z = [opt.theta_int; opt.theta_ext];
-
 % Now form matrices that have indexing information about various bins
-if map_to_exterior
-  bin_indices_int = zeros([N_vertices 2]);
-  bin_indices_int(:,2) = cumsum(bin_count_int(:));
-  bin_indices_int(1,1) = 1;
-  bin_indices_int(2:end,1) = bin_indices_int(1:end-1,2)+1;
-  pick_bin_int = logical(spalloc(length(z), N_vertices, length(z))); 
-  for q = 1:N_vertices
-    is = bin_indices_int(q,1):bin_indices_int(q,2);
-    pick_bin_int(is,q) = true;
-  end
-else
-  bin_indices_int = [];
-  pick_bin_int = logical(spalloc(length(z), N_vertices, length(z)));
-end
-if map_to_interior
-  bin_indices_ext = zeros([N_vertices 2]);
-  bin_indices_ext(:,2) = cumsum(bin_count_ext(:));
-  bin_indices_ext(1,1) = 1;
-  bin_indices_ext(2:end,1) = bin_indices_ext(1:end-1,2)+1;
-  bin_indices_ext = bin_indices_ext + N_interior;
-  pick_bin_ext = logical(spalloc(length(z), N_vertices, length(z))); 
-  for q = 1:N_vertices
-    is = bin_indices_ext(q,1):bin_indices_ext(q,2);
-    pick_bin_ext(is,q) = true;
-  end
-else
-  bin_indices_ext = [];
-  pick_bin_ext = logical(spalloc(length(z), N_vertices, length(z)));
-end
+%if map_to_exterior
+%  bin_indices_int = zeros([N_vertices 2]);
+%  bin_indices_int(:,2) = cumsum(bin_count_int(:));
+%  bin_indices_int(1,1) = 1;
+%  bin_indices_int(2:end,1) = bin_indices_int(1:end-1,2)+1;
+%  pick_bin_int = logical(spalloc(length(z), N_vertices, length(z))); 
+%  for q = 1:N_vertices
+%    is = bin_indices_int(q,1):bin_indices_int(q,2);
+%    pick_bin_int(is,q) = true;
+%  end
+%else
+%  bin_indices_int = [];
+%  pick_bin_int = logical(spalloc(length(z), N_vertices, length(z)));
+%end
+%if map_to_interior
+%  bin_indices_ext = zeros([N_vertices 2]);
+%  bin_indices_ext(:,2) = cumsum(bin_count_ext(:));
+%  bin_indices_ext(1,1) = 1;
+%  bin_indices_ext(2:end,1) = bin_indices_ext(1:end-1,2)+1;
+%  bin_indices_ext = bin_indices_ext + N_interior;
+%  pick_bin_ext = logical(spalloc(length(z), N_vertices, length(z))); 
+%  for q = 1:N_vertices
+%    is = bin_indices_ext(q,1):bin_indices_ext(q,2);
+%    pick_bin_ext(is,q) = true;
+%  end
+%else
+%  bin_indices_ext = [];
+%  pick_bin_ext = logical(spalloc(length(z), N_vertices, length(z)));
+%end
 
 % Now, e.g. z(bin_indices_int(34,1):bin_indices_int(34,2)) are all the points
 % that are in bin 34 on the interior. So are z(pick_bin_int(34,:)).
 
 % Find last (really the first) tooth we must zipup to:
-max_tooth = min([bin_id_int; bin_id_ext]);
-
+%max_tooth = min([bin_id_int; bin_id_ext]);
 
 slit_interior = [true([N_interior 1]); false([N_exterior 1])];
 slit_exterior = not(slit_interior);
@@ -224,8 +221,7 @@ interior = false(size(z));
 %% Now go through all the slits
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rho = assumptions.tooth_length;  % meh, alias
-%M = zeros([assumptions.N_teeth - max_tooth + 1, 2]);
-M = zeros([assumptions.N_teeth, 2]);
+M = zeros([assumptions.N_teeth - max_tooth + 1, 2]);
 h = eye(2);
 for q = assumptions.N_teeth:-1:1
   zipup_int = true;
@@ -322,6 +318,7 @@ z = real(terminal_map(z, assumptions));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Postprocessing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 psi_out = wrap(angle(moebius_inverse(z(1:N_interior), H_ext)), interval);
 psi_in = wrap(angle(moebius_inverse(z(N_interior+1:end), H_int)), interval);
 

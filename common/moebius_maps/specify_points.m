@@ -25,7 +25,7 @@ post_map = inverse_map(post_map);
 % w = (a*z + b)/(z + d)      (1)
 A = [points(:), ones([3 1]), -images(:)];
 
-tol = 1e-20;
+tol = 1e-14;
 if abs(det(A))<tol % Then guess (1) was wrong.
   % The guess a new form:
   % w = (a*z+b)
