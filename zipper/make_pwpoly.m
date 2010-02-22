@@ -37,7 +37,17 @@ N = length(opt.local_nodes);
 cells = [theta_int, [theta_int(2:end); theta_int(1) + 2*pi]];
 p = repnodes(opt.local_nodes, cells);
 
-temp = interp_fprint(theta_int, theta_ext, 'theta_int', p);
+if length(opt.local_nodes)==2
+  norm(opt.local_nodes(:) - [-1; 1])
+  if norm(opt.local_nodes(:) - [-1; 1])<1e-10
+    temp = [theta_ext(:), [theta_ext(2:end); theta_ext(1)+2*pi]].';
+  else
+    temp = interp_fprint(theta_int, theta_ext, 'theta_int', p);
+  end
+  else
+  temp = interp_fprint(theta_int, theta_ext, 'theta_int', p);
+
+end
 %temp = interp_fprint(theta_int, theta_ext, 'theta_int', p(:,1));
 % Stupid machine eps crap:
 if abs(p(1,1))<1e-14;

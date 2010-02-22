@@ -30,6 +30,9 @@ hxmy = fprint_extend(stuff, x-y);
 b = 3 + i;
 bbar = conj(b);
 
-mu = (b*hxpy + bbar*hxmy - 4*hx - 2*H)./...
+% This is dh/dzbar divided by dh/dz:
+mu = i*(b*hxpy + bbar*hxmy - 4*hx - 2*H)./...
      (b*hxpy - bbar*hxmy - 4*i*hx + 2*i*H);
-mu = conj(w)./(i*w).*mu;
+%mu = i*(b*hxmy + bbar*hxpy - 4*hx - 2*conj(H))./...
+%mu = conj(w)./(i*w).*mu;
+mu = -mu.*w./conj(w);
