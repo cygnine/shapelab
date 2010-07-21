@@ -19,9 +19,10 @@ function[w_n, z_n, mapdata] = calculate_moebius_alignment(w_n, z_n, mapdata)
 %       4.) Maps the result of all these points to the disc. (A map from H to
 %           D; not included in mapdata)
 
-persistent moebius maps
+persistent moebius maps wrap
 if isempty(moebius)
   from shapelab.common import moebius
+  from labtools import interval_wrap as wrap
 
   maps.H_to_D = [-1, i; ...
                   1, i];
@@ -94,8 +95,19 @@ mapdata.moebius_maps.interior_terminal = ...
 
 w_n = moebius(w_n, mapdata.moebius_maps.interior_terminal);
 z_n = moebius(z_n, mapdata.moebius_maps.exterior_terminal);
-%%
+
+% Before mapping to unit circle, also save fingerprint values
+w = w_n(1:end-3);
+mapdata.fprint_int = wrap(atan2(2*w, 1-w.^2), [0, 2*pi]);
+w = z_n(1:end-3);
+mapdata.fprint_ext = wrap(atan2(2*w, 1-w.^2), [0, 2*pi]);
 
 % Finally, map to unit circle
 w_n = moebius(w_n, maps.H_to_D);
 z_n = moebius(z_n, maps.H_to_D);
+
+% Fix machine eps crap:
+mapdata.fprint_int(1) = 0;
+mapdata.fprint_ext(1) = 0;
+w_n(1) = 1;
+z_n(1) = 1;

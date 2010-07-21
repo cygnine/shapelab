@@ -12,3 +12,6 @@ shapelab.curves = matlab_import('curves');
 shapelab.geno = matlab_import('geno');
 shapelab.extensions = matlab_import('extensions');
 shapelab.wp = matlab_import('wp');
+shapelab.diffs1 = matlab_import('diffs1');
+
+pwd_addpath('classes');
