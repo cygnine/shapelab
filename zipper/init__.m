@@ -3,6 +3,9 @@ function[zipper] = init__()
 %
 % [nodes] = init__()
 
-zipper = recurse_files(pwd);
-zipper.drivers = matlab_import('drivers');
-zipper.sliders = matlab_import('sliders');
+module_list = {'drivers', 'sliders'};
+
+zipper = recurse_files(pwd, module_list);
+
+%zipper.drivers = matlab_import('drivers');
+%zipper.sliders = matlab_import('sliders');

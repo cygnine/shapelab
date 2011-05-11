@@ -1,5 +1,5 @@
 function[Ginv, factors, Vs] = Ginv_matrix_gradient(theta)
-% Ginv_matrix_gradient -- gradient of the Green's function matrix
+% Ginv_matrix_gradient -- gradient of the (inverse) Green's function matrix
 %
 % [Ginv, factors, Vs] = Ginv_matrix_gradient(theta)
 %
@@ -9,10 +9,10 @@ function[Ginv, factors, Vs] = Ginv_matrix_gradient(theta)
 %     construct the rank-2 derivative of inv(G) with respect to theta(j) for
 %     all j. 
 %
-%     d G/d theta(j) = Vs{j}*diag([factors(j), -factors(j)])*Vs{j}'
+%     d Ginv/d theta(j) = Vs{j}*diag([factors(j), -factors(j)])*Vs{j}'
 %
 %     hence factors(j) is the magnitude of the eigenvalue of dG/dtheta(j), and
-%     Vs{j} contain the eigenvectors.
+%     Vs{j} contain the 2 eigenvectors.
 
 persistent Gf Gfd
 if isempty(Gf)
@@ -24,7 +24,10 @@ N = length(theta);
 [thetai, thetaj] = meshgrid(theta);
 thetas = thetaj - thetai;
 G = Gf(thetas);
-Ginv = inv(G);
+
+R = chol(G);
+Ginv = inv(R');
+Ginv = Ginv'*Ginv;
 
 G_d_theta = Gfd(thetas);
 factors = sqrt(sum(G_d_theta.^2, 1)).';

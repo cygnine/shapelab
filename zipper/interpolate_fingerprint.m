@@ -93,7 +93,8 @@ N_exterior = length(opt.theta_ext);
 %       vertices(end-1) ---> somewhere on real line
 
 % Find point somewhere on other side:
-middle_index = mod(ground_zero + floor(N_vertices/2) - 1, N_vertices) + 1;
+%middle_index = mod(ground_zero + floor(N_vertices/2) - 1, N_vertices) + 1;
+middle_index = mod(1 + floor(N_vertices/2) - 1, N_vertices) + 1;
 
 % Perform alignment: wrap fingerprint so that vertices(1) ---> (0,0)
 vertices_int = exp(i*vertices_int);

@@ -3,5 +3,8 @@ function[common] = init__()
 %
 % [nodes] = init__()
 
-common = recurse_files(pwd);
-common.moebius_maps = matlab_import('moebius_maps');
+module_list = {'moebius_maps'};
+
+common = recurse_files(pwd, module_list);
+
+%common.moebius_maps = matlab_import('moebius_maps');

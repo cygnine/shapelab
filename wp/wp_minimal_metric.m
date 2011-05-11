@@ -18,16 +18,16 @@ function[H, K] = wp_minimal_metric(theta)
 %     where phi = [1, sin, cos], a basis for the kernel of WP norm, and G(theta)
 %     is the Green's function under the WP metric.
 
-persistent greens_function L_kernel_vandermonde
+persistent greens_function kernel_basis
 if isempty(greens_function)
-  from shapelab.wp import greens_function
-  L_kernel_vandermonde = @(x) [ones([length(x) 1]) sin(x(:)) cos(x(:))];
+  from shapelab.wp import greens_function kernel_basis
+  %L_kernel_vandermonde = @(x) [ones([length(x) 1]) sin(x(:)) cos(x(:))];
 end
 
 N = length(theta);
 [thetai, thetaj] = meshgrid(theta, theta);
 G = greens_function(thetai-thetaj);
-U = L_kernel_vandermonde(theta);
+U = kernel_basis(theta);
 
 R = chol(G);
 Ri = inv(R);
