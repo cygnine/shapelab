@@ -4,6 +4,8 @@ function[wp] = init__()
 % [nodes] = init__()
 
 module_list = {'teichon'};
+%wp = recurse_files(pwd, module_list);
 
-wp = recurse_files(pwd, module_list);
-%wp.teichon = matlab_import('teichon');
+wp.module_list = module_list;
+wp.recurse_files = true;
+wp.addpaths = {};

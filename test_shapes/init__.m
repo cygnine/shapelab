@@ -3,4 +3,8 @@ function[test_shapes] = init__()
 %
 % [nodes] = init__()
 
-test_shapes = recurse_files(pwd);
+%test_shapes = recurse_files(pwd);
+
+test_shapes.module_list = {};
+test_shapes.recurse_files = true;
+test_shapes.addpaths = {};

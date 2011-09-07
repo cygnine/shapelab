@@ -3,4 +3,8 @@ function[drivers] = init__()
 %
 % [drivers] = init__()
 
-drivers = recurse_files(pwd);
+%drivers = recurse_files(pwd);
+
+drivers.module_list = {};
+drivers.recurse_files = true;
+drivers.addpaths = {};

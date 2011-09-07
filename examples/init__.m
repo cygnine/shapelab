@@ -3,4 +3,8 @@ function[examples] = init__()
 %
 % [nodes] = init__()
 
-examples = recurse_files(pwd);
+%examples = recurse_files(pwd);
+
+examples.module_list = {};;
+examples.recurse_files = true;
+examples.addpaths = {};

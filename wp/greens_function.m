@@ -1,7 +1,7 @@
 function[G] = greens_function(theta, d)
 % greens_function -- Evaluates the Green's function of operator L
 %
-% G = greens_function(theta, [[d==1]])
+% G = greens_function(theta, [[d==0]])
 %
 %     Evaluates the d'th derivative of the Green's function at the locations theta:
 %

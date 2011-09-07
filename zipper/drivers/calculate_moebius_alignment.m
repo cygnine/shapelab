@@ -80,6 +80,7 @@ else
 end
 
 bigmap = maps.map_z_in_on_disc_to_0*maps.H_to_D;
+
 interior_rotation = -angle(moebius(z_n(1), bigmap));
 mapdata.moebius_maps.interior_rotation = ...
        [exp(i*interior_rotation), 0; ...

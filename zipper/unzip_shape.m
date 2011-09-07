@@ -113,6 +113,7 @@ for q = 1:N_teeth
 end
 
 [w_n, z_n, mapdata] = terminal_map(w_n, z_n, mapdata);
+
 [w_n, z_n, mapdata] = moebius_alignment(w_n, z_n, mapdata);
 
 % Done

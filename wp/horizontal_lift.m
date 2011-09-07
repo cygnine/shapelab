@@ -1,7 +1,7 @@
-function[vz,m,w] = horizontal_lift(nodes, v, z, d)
+function[vz,m,w,v2p,p2v] = horizontal_lift(nodes, v, z, d, ht)
 % horizontal_lift -- Evaluates the WP horizontal lift of velocity fields
 %
-% [vz,m,w] = horizontal_lift(nodes, v, z, [[d=0]])
+% [vz,m,w,v2p,p2v] = horizontal_lift(nodes, v, z, [[d=0, ht=[] ]])
 %
 %     If nodes and v are vectors of the same size, this function computes the WP
 %     horizontal lift coefficients m and w that correspond to the velocity field
@@ -23,7 +23,12 @@ function[vz,m,w] = horizontal_lift(nodes, v, z, d)
 %     The input z can be empty in which case vz is empty and m and w contain the
 %     coefficients.
 %
-%     The workhorse for this routine is the gsvd.
+%     The input 'ht' determines weights to be put on each ensemble member.
+%     Therefore, length(ht)==M.
+%
+%     The workhorse for this routine is the gsvd. The last two outputs are
+%     function handles that allow one to travel between momentum and velocity: 
+%     v = v2p(p) and p = p2v(v).
 
 persistent greens_matrix kernel_basis greens_function
 if isempty(greens_matrix)
@@ -33,10 +38,13 @@ end
 [N,M] = size(nodes);
 
 % Input validation
-if nargin < 4
-  d = 0;
-  if nargin < 3
-    z = [];
+if nargin < 5
+  ht = ones([M 1]);
+  if nargin < 4
+    d = 0;
+    if nargin < 3
+      z = [];
+    end
   end
 end
 if any([N,M] ~= size(v));
@@ -44,6 +52,9 @@ if any([N,M] ~= size(v));
 end
 if (M ~= size(z,2)) & (size(z,2) > 0)
   error('Input ''z'' must have the same number of columns as ''nodes''');
+end
+if M ~= length(ht)
+  error('Input ''ht'' must have length equal to number of columns of ''nodes''');
 end
 
 % These can be huge matrices:
@@ -55,7 +66,12 @@ for m = 1:M
   i1 = 1 + (m-1)*N;
   i2 = m*N;
   G(i1:i2,i1:i2) = greens_matrix(nodes(:,m));
-  L(i1:i2,i1:i2) = chol(G(i1:i2,i1:i2));
+  [vtemp,dtemp] = eig(G(i1:i2,i1:i2));
+  dtempd = diag(dtemp);
+  dtempd(dtempd<0) = 0;
+  dtemp = sqrt(diag(dtempd));
+  L(i1:i2,i1:i2) = sqrt(ht(m))*dtemp*vtemp';
+  %L(i1:i2,i1:i2) = sqrt(ht(m))*chol(G(i1:i2,i1:i2));
 
   G(i1:i2,end-2:end) = kernel_basis(nodes(:,m));
 end
@@ -68,11 +84,20 @@ end
 %mw = H*v(:);
 
 % All the cool kids are doing it this equivalent way;
-diagC = 1./diag(C,3);
-mw = X'\[zeros([3 1]); diagC.*(U'*v(:))];
+diagC = diag(C,3);
+diagCi = 1./diagC;
+mw = X'\[zeros([3 1]); diagCi.*(U'*v(:))];
 
-mom = reshape(mw(1:M*N), [N M]);
+mom = reshape(mw(1:M*N), [N M])*diag(ht);
 w = mw(M*N+1:end);
+
+mwf = @(vel) subsref(X'\[zeros([3 1]); diagCi.*(U'*vel(:))], ...
+                     struct('type', '()', 'subs', {{1:(M*N)}}));
+v2p = @(vel) reshape(mwf(v), [N M])*diag(ht);
+
+pscl = @(p) subsref(p*diag(1/ht), struct('type', '()', 'subs', {{':'}}));
+p2v = @(p) U*(diagC.*subsref(X'*[pscl(p); zeros([3 1])], ...
+                      struct('type', '()', 'subs', {{4:M*N+3}})));
 
 % Now evaluate the lift
 if isempty(z)

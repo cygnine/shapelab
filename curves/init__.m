@@ -3,6 +3,9 @@ function[curves] = init__()
 %
 % nodes = init__()
 
-curves = recurse_files(pwd);
+%curves = recurse_files(pwd);
+%pwd_addpath('classes');
 
-pwd_addpath('classes');
+curves.module_list = {};
+curves.recurse_files = true;
+curves.addpaths = {'classes'};

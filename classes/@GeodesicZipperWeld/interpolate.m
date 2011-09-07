@@ -1,60 +1,67 @@
-function[phi_out, phi_in] = interpolate_weld(mapdata, varargin)
-% interpolate_weld -- Interpolates a welding map
+function[varargout] = interpolate(self, varargin)
+% interpolate -- Interpolates welding map
 %
-% [phi_out, phi_in] = interpolate_weld(mapdata, {theta_int=[], theta_ext=[]})
+% theta_exterior = interpolate(self, theta_interior)
 %
-%     Interpolates the welding map specified by mapdata. At this stage, only
-%     `geodesic'-type maps are supported. The points theta_int are transferred
-%     via the weld to phi_out, and the points theta_ext are transferred to
-%     phi_in.
+%     Pushes theta_interior values forward through the welding map.
+%
+% theta_interior = interpolate(self, [], theta_exterior)
+%
+%     Pulls back theta_exterior_values through the map inverse.
+%
+% [exterior, interior] = interpolate(self, theta_interior, theta_exterior)
+%
+%     Simultaneously pushes forward theta_interior ---> exterior,
+%                        pulls back interior <--- theta_exterior
 
-persistent strict_inputs zip moebius 
-persistent inverse_terminal_map assert_enough_points select_slider inverse_moebius_alignment
-persistent terminal_map moebius_alignment
-
-if isempty(strict_inputs)
-  from labtools import strict_inputs
-  from shapelab.common import moebius 
-  from shapelab.zipper import select_slider assert_enough_points
-  from shapelab.zipper.drivers import inverse_initial_map inverse_terminal_map inverse_moebius_alignment
-  from shapelab.zipper.drivers import terminal_map moebius_alignment
+%opt = strict_inputs({'theta_int', 'theta_ext'}, {[], []}, [], varargin{:});
+if length(varargin)==1
+  varargin{2} = [];
 end
-
-opt = strict_inputs({'theta_int', 'theta_ext'}, {[], []}, [], varargin{:});
 
 % Miscellaneous preprocessing
-map_to_exterior=true; exterior_size = size(opt.theta_ext); 
-opt.theta_ext = opt.theta_ext(:); N_exterior = length(opt.theta_ext);
-map_to_interior=true; interior_size = size(opt.theta_int); 
-opt.theta_int = opt.theta_int(:); N_interior = length(opt.theta_int);
+interior_size = size(varargin{1});
+varargin{1} = varargin{1}(:); 
+
+exterior_size = size(varargin{2});
+varargin{2} = varargin{2}(:);
 
 % First figure out if we're doing interior to exterior or vice versa, etc.
-if isempty(opt.theta_int)
-  map_to_exterior=false;
-end
-if isempty(opt.theta_ext)
-  map_to_interior=false;
-end
+map_to_exterior = not(isempty(varargin{1}));
+map_to_interior = not(isempty(varargin{2}));
 
 % If nothing to be done...return
 if not(map_to_interior | map_to_exterior)
+  varargout{1:nargout} = [];
   return
 end
+% Append 0 values cuz for some reason I can't figure out how to make this work
+% without 0 as a first value.
+%varargin{1} = [0; varargin{1}];
+%varargin{2} = [0; varargin{2}];
+N_interior = length(varargin{1});
+N_exterior = length(varargin{2});
 
 % Invert the Moebius alignment
-[z_interior, z_exterior] = inverse_moebius_alignment(exp(i*opt.theta_int), exp(i*opt.theta_ext), mapdata);
-[vertices_int, vertices_ext] = inverse_moebius_alignment(mapdata.vertices_in, mapdata.vertices_out, mapdata);
+%[z_interior, z_exterior] = inverse_moebius_alignment(exp(i*opt.theta_int), exp(i*opt.theta_ext), mapdata);
+[z_interior, z_exterior] = self.inverse_moebius_alignment(exp(i*varargin{1}), exp(i*varargin{2}));
+
+%[vertices_int, vertices_ext] = inverse_moebius_alignment(mapdata.vertices_in, mapdata.vertices_out, mapdata);
+[vertices_int, vertices_ext] = self.inverse_moebius_alignment(... 
+         self.interior_disc_vertices, self.exterior_disc_vertices);
 
 % Fix real-valued crap and find which vertices the interpolated points lie
 % between
 vertices_int = real(vertices_int); vertices_ext = real(vertices_ext);
 vertices_int(1) = -Inf; vertices_ext(1) = -Inf;  % By construction of the map
+
 N_vertices = length(vertices_int);
 
 if map_to_exterior
   z_interior = real(z_interior);
-  z_interior(abs(mod(opt.theta_int,2*pi))<1e-14) = -Inf;
+  z_interior(abs(mod(varargin{1} - self.interior_interval(1),2*pi))<1e-14) = -Inf;
   [z_interior, sort_order_interior] = sort(z_interior); 
+
   [bin_count_int, bin_id_int] = histc(z_interior, [vertices_int; Inf]);
   bin_count_int(1) = bin_count_int(1) + bin_count_int(end);
   bin_count_int(end) = [];
@@ -62,10 +69,12 @@ if map_to_exterior
 else
   bin_id_int = [];
 end
+
 if map_to_interior
   z_exterior = real(z_exterior);
-  z_exterior(abs(mod(opt.theta_ext,2*pi))<1e-14) = -Inf;
+  %z_exterior(abs(mod(varargin{2} - self.exterior_interval(1),2*pi))<1e-14) = -Inf;
   [z_exterior, sort_order_exterior] = sort(z_exterior); 
+
   [bin_count_ext, bin_id_ext] = histc(z_exterior, [vertices_ext; Inf]);
   bin_count_ext(1) = bin_count_ext(1) + bin_count_ext(end);
   bin_count_ext(end) = [];
@@ -86,9 +95,10 @@ exterior_ind = null_ind; exterior_ind(N_interior+1:end) = true;
 exterior_ind(null_ind) = false;
 
 % Invert the terminal map
-z = inverse_terminal_map(z, mapdata, null_ind, interior_ind, exterior_ind);
+z = self.inverse_terminal_map(z, null_ind, interior_ind, exterior_ind);
 
-slide = select_slider(mapdata.type);
+%slide = select_slider(mapdata.type);
+%slider/geodesic_slider
 
 slit_interior = interior_ind;
 slit_exterior = exterior_ind;
@@ -96,7 +106,8 @@ slit_exterior = exterior_ind;
 N_interior_tabled = 0;
 N_exterior_tabled = 0;
 
-for q = mapdata.N_teeth:-1:max_tooth
+% I wrote this once upon a clairvoyant time...it still seems to work.
+for q = self.N_teeth:-1:max_tooth
   if map_to_exterior
     interior_ind2 = N_interior - N_interior_tabled;
     interior_ind1 = N_interior + 1 - N_interior_tabled - bin_count_int(q+2);
@@ -110,7 +121,7 @@ for q = mapdata.N_teeth:-1:max_tooth
     N_exterior_tabled = N_exterior_tabled + bin_count_ext(q+2);
   end
 
-  [z] = slide('zipup', q, z, mapdata, null_ind, slit_interior, slit_exterior);
+  [z] = self.slider('zipup', q, z, null_ind, slit_interior, slit_exterior);
 end
 
 % Switch signs for those on bin_count_int/ext(1)
@@ -130,8 +141,8 @@ end
 slit_interior(null_ind) = false;
 slit_exterior(null_ind) = false;
 
-for q = (max_tooth):mapdata.N_teeth
-  [z] = slide('unzip', q, z, mapdata, null_ind, slit_exterior, slit_interior);
+for q = (max_tooth):self.N_teeth
+  [z] = self.slider('unzip', q, z, null_ind, slit_exterior, slit_interior);
   if map_to_interior
     N_exterior_tabled = N_exterior_tabled - bin_count_ext(q+2);
     null_ind(slit_exterior) = true;
@@ -152,7 +163,7 @@ for q = (max_tooth):mapdata.N_teeth
 end
 
 % Redo the terminal map
-z = terminal_map(z, mapdata);
+z = self.terminal_map(z);
 
 if map_to_interior
   z_exterior = z(N_interior+1:end);
@@ -164,8 +175,26 @@ if map_to_exterior
 end
 
 % Redo the moebius alignment map
-[z_exterior, z_interior] = moebius_alignment(z_exterior, z_interior, mapdata);
+[z_exterior, z_interior] = self.moebius_alignment(z_exterior, z_interior);
 
 % We're done
-phi_out = reshape(angle(z_interior), interior_size);  % These have been mapped to the exterior
-phi_in = reshape(angle(z_exterior), exterior_size);   % These have been mapped to the interior
+tempi = self.interior_wrap(angle(z_interior));
+tempe = self.exterior_wrap(angle(z_exterior));
+% First get rid of first points
+%tempi(1) = []; tempe(1) = [];
+phi_out = reshape(tempi, interior_size);  % These have been mapped to the exterior
+phi_in = reshape(tempe, exterior_size);   % These have been mapped to the interior
+
+% Deal output(s)
+if xor(map_to_interior, map_to_exterior)
+
+  if map_to_interior
+    varargout{1} = phi_in;
+  else
+    varargout{1} = phi_out;
+  end
+  varargout{2} = [];
+else
+  varargout{1} = phi_out;
+  varargout{2} = phi_in;
+end
