@@ -26,17 +26,23 @@ function[a, b, y, J, wp] = epdiff_teichon_variation(a0, b0, y0,T, varargin)
 %     If the optional input wrap is set to true, then the locations b of the
 %     teichons and positions y are wrapped to the [0, 2*pi) interval.
 
-persistent strict_inputs epdiff_rhs
+persistent parser input_parser
+persistent epdiff_rhs
 persistent rk interval_wrap wrap
 persistent greens_function
-if isempty(strict_inputs)
-  from labtools import strict_inputs interval_wrap
+if isempty(parser)
+  from labtools import interval_wrap input_parser
   from shapelab.wp import epdiff_teichon_variation_rhs as epdiff_rhs
   from shapelab.wp import greens_function
+
+  [opt, parser] = input_parser({'dt', 'wrap'}, {0.01, false}, [], varargin{:});
 
   from odesolve.coeffs import lserk4
   rk = lserk4();
   wrap = @(t) interval_wrap(t, [0, 2*pi]);
+else
+  parser.parse(varargin{:});
+  opt = parser.Results;
 end
 
 N = length(a0);
@@ -49,8 +55,6 @@ if N < 4
   J = [];
   wp = [];
 end
-
-opt = strict_inputs({'dt', 'wrap'}, {0.01, false}, [], varargin{:});
 
 b0 = b0(:); a0 = a0(:);
 

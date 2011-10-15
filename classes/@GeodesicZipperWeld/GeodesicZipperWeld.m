@@ -19,13 +19,12 @@ classdef GeodesicZipperWeld < ZipperWeld
   methods
     function self = GeodesicZipperWeld(z, varargin)
 
-      persistent strict_inputs
-      if isempty(strict_inputs)
-        from labtools import strict_inputs
+      persistent input_parser parser
+      if isempty(parser)
+        from labtools import input_parser
+
+        [opt,parser] = input_parser({'tooth_length', 'visualize'}, {0.05, false}, []);
       end
-      inputs = {'tooth_length','visualize'};
-      defaults = {0.05, false};
-      opt = strict_inputs(inputs,defaults,[],varargin{:});
 
       if isempty(z)
         % User asking us to take discrete weld evaluations
@@ -34,6 +33,9 @@ classdef GeodesicZipperWeld < ZipperWeld
         % User asking us to take samples on shape
         newargs = varargin;
       end
+
+      parser.parse(newargs{:});
+      opt = parser.Results;
 
       self = self@ZipperWeld(newargs{:});
       self.tooth_length = opt.tooth_length;

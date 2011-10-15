@@ -17,12 +17,15 @@ function[w] = positive_angle_exponential(z,a,varargin)
 %     the (+) x-axis side of the branch and which take the (-) x-axis side of
 %     the branch. For inputs not on the x-axis, this indicator is irrelevant.
 
-persistent input_schema
-if isempty(input_schema)
-  from labtools import input_schema
-end
+persistent input_parser parser
+if isempty(parser)
+  from labtools import input_parser
 
-opt = input_schema({'cut_bias'}, {true}, [], varargin{:});
+  [opt,parser] = input_parser({'cut_bias'}, {true}, [], varargin{:});
+else
+  parser.parse(varargin{:});
+  opt = parser.Results;
+end
 
 if length(opt.cut_bias)==1
   if opt.cut_bias

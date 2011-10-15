@@ -33,13 +33,17 @@ classdef ZipperWeld < ConformalWeld
   methods
     function self = ZipperWeld(varargin)
 
-      persistent strict_inputs
-      if isempty(strict_inputs)
-        from labtools import strict_inputs
+      persistent input_parser parser
+      if isempty(parser)
+        from labtools import input_parser
+
+        inputs = {'inf_location', 'inf_image', 'center_location', 'center_image', 'winding_number'};
+        defaults = {Inf, Inf, 0, 0, 1};
+        [opt,parser] = input_parser(inputs, defaults, [], varargin{:});
+      else
+        parser.parse(varargin{:});
+        opt = parser.Results;
       end
-      inputs = {'inf_location', 'inf_image', 'center_location', 'center_image', 'winding_number'};
-      defaults = {Inf, Inf, 0, 0, 1};
-      opt = strict_inputs(inputs,defaults,[],varargin{:});
 
       self.inf_location = opt.inf_location;
       self.inf_image = opt.inf_image;
