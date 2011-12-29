@@ -16,14 +16,17 @@ function[z] = ellipse(N, varargin)
 %
 %     for t in [0, 2*pi].
 
-persistent strict_inputs
-if isempty(strict_inputs)
-  from labtools import strict_inputs
-end
+persistent input_parser parser
+if isempty(input_parser)
+  from labtools import input_parser
 
-inputs = {'a', 'b', 'rotation', 'centroid'};
-defaults = {1, 0.75, 0, 0};
-opt = strict_inputs(inputs, defaults, [], varargin{:});
+  inputs = {'a', 'b', 'rotation', 'centroid'};
+  defaults = {1, 0.75, 0, 0};
+  [opt,parser] = input_parser(inputs, defaults, [], varargin{:});
+else
+  parser.parse(varargin{:});
+  opt = parser.Results;
+end
 
 t = linspace(0, 2*pi, N+1).';
 t(end) = [];

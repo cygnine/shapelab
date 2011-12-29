@@ -10,14 +10,18 @@ function[z] = polar_linspace(N,M,varargin)
 %     If r0=0, this function isn't smart enough to see that and puts M points at
 %     0.
 
-persistent input_schema
-if isempty(input_schema)
-  from labtools import input_schema
-end
+persistent input_parser parser
+if isempty(input_parser)
+  from labtools import input_parser
 
-inputs = {'r0', 'r1', 'theta0', 'theta1'};
-defaults = {0,1,0,2*pi};
-opt = input_schema(inputs, defaults, [], varargin{:});
+  inputs = {'r0', 'r1', 'theta0', 'theta1'};
+  defaults = {0,1,0,2*pi};
+
+  [opt,parser] = input_parser(inputs, defaults, [], varargin{:});
+else
+  parser.parse(varargin{:});
+  opt = parser.Results;
+end
 
 z = zeros([N*M 1]);
 

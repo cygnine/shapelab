@@ -39,6 +39,20 @@ interior = (nflags | pflags);
 slit_interior = not(interior) & not(point_id);
 slit_exterior = not(interior) & point_id;
 
+% For those z's in slit_interior that lie between self.interior_vertices(end)
+% and self.interior_vertices(1), we'll have to make a special exception in
+% self.inverse_terminal_map because of multi-valued power functions. We'll do
+% the same for slit_exterior as well.
+z_angles = angle(z);
+slit_interior_limbo = slit_interior & (  ...
+                (z_angles > self.interior_vertices(end)) & ...
+                (z_angles < self.interior_vertices(1))  ...
+              );
+slit_exterior_limbo = slit_exterior & (  ...
+                (z_angles > self.exterior_vertices(end)) & ...
+                (z_angles < self.exterior_vertices(1))  ...
+              );
+
 % We're doing all the maps backwards now:
 [z(~point_id), z(point_id)] = self.inverse_moebius_alignment(z(~point_id), z(point_id));
 
@@ -46,7 +60,7 @@ slit_exterior = not(interior) & point_id;
 z(slit_interior) = real(z(slit_interior));
 z(slit_exterior) = real(z(slit_exterior));
 
-z = self.inverse_terminal_map(z, interior, slit_interior, slit_exterior);
+z = self.inverse_terminal_map(z, interior, slit_interior, slit_exterior, slit_interior_limbo, slit_exterior_limbo);
 
 for q = self.N_teeth:-1:1
   %[z] = slide('zipup', q, z, mapdata, interior, slit_interior, slit_exterior);

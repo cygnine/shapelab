@@ -36,6 +36,12 @@ zinf = z_ext(end);
 z_int = self.moebius_maps.tooth_maps{tooth}.inv(z_int);
 z_ext = self.moebius_maps.tooth_maps{tooth}.inv(z_ext);
 
+% Dumb fix for floating-point nonsense
+if tooth==1
+  z_int(1) = Inf;
+  z_ext(1) = Inf;
+end
+
 %H = self.moebius_maps.tooth_maps{tooth}.inv.H;
 %self.derivative_at_inf = self.derivative_at_inf*...
 %   det(H)/(H(2,1)*zinf + H(2,2))^2;

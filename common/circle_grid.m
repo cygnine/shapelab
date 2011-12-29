@@ -16,13 +16,19 @@ function[c] = circle_grid(varargin)
 %        c = circle_grid('r', 0.05, 'n', 35);
 %        plot(c, 'k'); axis equal;
 
-persistent strict_inputs bisection
-if isempty(strict_inputs)
-  from labtools import strict_inputs
+persistent input_parser parser bisection
+if isempty(parser)
+  from labtools import input_parser
   from labtools.rootfind import bisection
+
+  inputs = {'r', 'n'};
+  defaults = {0.1, 20};
+  [opt,parser] = input_parser(inputs, defaults, [], varargin{:});
+else
+  parser.parse(varargin{:});
+  opt = parser.Results;
 end
 
-opt = strict_inputs({'r', 'n'}, {0.1, 20}, [], varargin{:});
 r = opt.r;
 
 M = 0;  % The total number of generated circles so far

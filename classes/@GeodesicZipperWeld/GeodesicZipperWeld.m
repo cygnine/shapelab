@@ -84,6 +84,7 @@ classdef GeodesicZipperWeld < ZipperWeld
     z = map_from_shape(self, z, varargin);
     %[z_int,z_ext] = separate_to_shape(self, theta_int, theta_ext);
     val = calculate_derivative_at_inf(self,zinf);
+    self = match(self, other)
   end
 
   methods(Access=protected)
@@ -99,7 +100,7 @@ classdef GeodesicZipperWeld < ZipperWeld
     [z_int, z_ext, self] = calculate_inverse_terminal_map(self, z_int, z_ext);
     z = terminal_map(self, z);
     [w, z, self] = calculate_moebius_alignment(self, w, z);
-    [z] = inverse_terminal_map(self, z, interior, slit_interior, slit_exterior);
+    [z] = inverse_terminal_map(self, z, interior, slit_interior, slit_exterior, slit_interior_limbo, slit_exterior_limbo);
     [zi, ze] = inverse_moebius_alignment(self, zi, ze);
     [z_int, z_ext, self] = calculate_inverse_moebius_alignment(self, z_int, z_ext);
     [N, N_teeth, z] = assert_enough_points(self, z, varargin)

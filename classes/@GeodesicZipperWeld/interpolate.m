@@ -42,6 +42,12 @@ end
 N_interior = length(varargin{1});
 N_exterior = length(varargin{2});
 
+% Make exceptions for complex power functions (goes into self.inverse_terminal_map)
+slit_interior_limbo = (varargin{1} > self.interior_vertices(end)) & ...
+                      (varargin{1} < self.interior_vertices(1));
+slit_exterior_limbo = (varargin{1} > self.exterior_vertices(end)) & ...
+                      (varargin{1} < self.exterior_vertices(1));
+
 % Invert the Moebius alignment
 %[z_interior, z_exterior] = inverse_moebius_alignment(exp(i*opt.theta_int), exp(i*opt.theta_ext), mapdata);
 [z_interior, z_exterior] = self.inverse_moebius_alignment(exp(i*varargin{1}), exp(i*varargin{2}));
@@ -84,7 +90,8 @@ else
 end
 
 % Find last (really the first) tooth we must zipup to:
-max_tooth = min([bin_id_int; bin_id_ext]);
+%max_tooth = min([bin_id_int; bin_id_ext]);
+max_tooth = min([bin_id_int-1; bin_id_ext-1; 1]);
 
 z = [z_interior; z_exterior];
 null_ind = false(size(z));
@@ -93,9 +100,11 @@ interior_ind = null_ind; interior_ind(1:N_interior) = true;
 interior_ind(null_ind) = false;
 exterior_ind = null_ind; exterior_ind(N_interior+1:end) = true;
 exterior_ind(null_ind) = false;
+slit_interior_limbo = interior_ind & [slit_interior_limbo; false(size(bin_id_ext))];
+slit_exterior_limbo = exterior_ind & [slit_exterior_limbo; false(size(bin_id_ext))];
 
 % Invert the terminal map
-z = self.inverse_terminal_map(z, null_ind, interior_ind, exterior_ind);
+z = self.inverse_terminal_map(z, null_ind, interior_ind, exterior_ind, slit_interior_limbo, slit_exterior_limbo);
 
 %slide = select_slider(mapdata.type);
 %slider/geodesic_slider
@@ -124,18 +133,20 @@ for q = self.N_teeth:-1:max_tooth
   [z] = self.slider('zipup', q, z, null_ind, slit_interior, slit_exterior);
 end
 
-% Switch signs for those on bin_count_int/ext(1)
+% Switch signs for those on bin_count_int/ext(max_tooth)
+%switch_bin = 1;
+switch_bin = max_tooth;
 if map_to_exterior
-  i2 = N_interior - N_interior_tabled - bin_count_int(2);;
-  i1 = N_interior + 1 - N_interior_tabled - bin_count_int(2) - bin_count_int(1);
+  i2 = N_interior - N_interior_tabled - bin_count_int(switch_bin+1);;
+  i1 = N_interior + 1 - N_interior_tabled - bin_count_int(switch_bin+1) - bin_count_int(switch_bin);
   z(i1:i2) = -real(z(i1:i2));
-  null_ind(1:bin_count_int(1)) = true;  % 'interior' points along z_0 -- z_1
+  null_ind(1:bin_count_int(switch_bin)) = true;  % 'interior' points along z_0 -- z_1
 end
 if map_to_interior
-  i2 = N_interior + N_exterior - N_exterior_tabled - bin_count_ext(2);
-  i1 = N_interior + N_exterior+1 - N_exterior_tabled - bin_count_ext(2) - bin_count_ext(1);
+  i2 = N_interior + N_exterior - N_exterior_tabled - bin_count_ext(switch_bin+1);
+  i1 = N_interior + N_exterior+1 - N_exterior_tabled - bin_count_ext(switch_bin+1) - bin_count_ext(switch_bin);
   z(i1:i2) = -real(z(i1:i2));
-  null_ind(N_interior+1:N_interior+bin_count_ext(1)) = true; % 'exterior' points
+  null_ind(N_interior+1:N_interior+bin_count_ext(switch_bin)) = true; % 'exterior' points
 end
 
 slit_interior(null_ind) = false;
@@ -143,7 +154,10 @@ slit_exterior(null_ind) = false;
 
 for q = (max_tooth):self.N_teeth
   [z] = self.slider('unzip', q, z, null_ind, slit_exterior, slit_interior);
+
+  % Need to include new points that were tabled, as well as enforce correct sign
   if map_to_interior
+    z(bin_id_ext==(q)) = -abs(real(z(bin_id_ext==(q))));
     N_exterior_tabled = N_exterior_tabled - bin_count_ext(q+2);
     null_ind(slit_exterior) = true;
     slit_exterior(:) = false;
@@ -152,6 +166,7 @@ for q = (max_tooth):self.N_teeth
     slit_exterior(exterior_ind1:exterior_ind2) = true;
   end
   if map_to_exterior
+    z(bin_id_int==(q)) = abs(real(z(bin_id_int==(q))));
     N_interior_tabled = N_interior_tabled - bin_count_int(q+2);
     null_ind(slit_interior) = true;
     slit_interior(:) = false;

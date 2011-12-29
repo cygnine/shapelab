@@ -93,7 +93,7 @@ w = mw(M*N+1:end);
 
 mwf = @(vel) subsref(X'\[zeros([3 1]); diagCi.*(U'*vel(:))], ...
                      struct('type', '()', 'subs', {{1:(M*N)}}));
-v2p = @(vel) reshape(mwf(v), [N M])*diag(ht);
+v2p = @(vel) reshape(mwf(vel), [N M])*diag(ht);
 
 pscl = @(p) subsref(p*diag(1/ht), struct('type', '()', 'subs', {{':'}}));
 p2v = @(p) U*(diagC.*subsref(X'*[pscl(p); zeros([3 1])], ...
