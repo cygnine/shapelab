@@ -22,3 +22,10 @@ end
 
 [x,y] = meshgrid(q(:), q(:));
 G = greens_function((x-y)', d);
+
+% Force symmetry:
+if mod(d,2)==0
+  G = 1/2*(G + G');
+else
+  G = 1/2*(G - G');
+end

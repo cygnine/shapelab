@@ -15,5 +15,5 @@ if isempty(greens_function)
   from shapelab.wp import greens_function
 end
 
-[temp1, temp2] = meshgrid(b,b);
+[temp1, temp2] = ndgrid(b,b);
 wp = sqrt(a'*greens_function(temp1-temp2)*a);

@@ -91,7 +91,8 @@ end
 
 % Find last (really the first) tooth we must zipup to:
 %max_tooth = min([bin_id_int; bin_id_ext]);
-max_tooth = min([bin_id_int-1; bin_id_ext-1; 1]);
+max_tooth = min([bin_id_int-1; bin_id_ext-1]);
+max_tooth = max([max_tooth 1]);
 
 z = [z_interior; z_exterior];
 null_ind = false(size(z));

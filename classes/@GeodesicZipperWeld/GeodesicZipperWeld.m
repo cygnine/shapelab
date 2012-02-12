@@ -84,7 +84,7 @@ classdef GeodesicZipperWeld < ZipperWeld
     z = map_from_shape(self, z, varargin);
     %[z_int,z_ext] = separate_to_shape(self, theta_int, theta_ext);
     val = calculate_derivative_at_inf(self,zinf);
-    self = match(self, other)
+    [self] = match(self, other)
   end
 
   methods(Access=protected)
