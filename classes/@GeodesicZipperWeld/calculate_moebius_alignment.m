@@ -113,15 +113,11 @@ self.derivative_at_inf = self.derivative_at_inf.*...
 
 wH = w;
 
-temp_der = angle(diff(z(end-4:end-3)));
-%asdf
-
 % Finally, map to unit circle
 w = self.moebius_maps.H_to_D(w);
 z = self.moebius_maps.H_to_D(z);
 % Compute final derivative: inf should now be at -i.
 self.derivative_at_inf = -2*i*self.derivative_at_inf;
-
 
 % Ok, remember we're doing M \circ \Psi \circ M^{-1}. Now do final M map taking
 % Inf to -i, evaluate derivative there. Happy day: we're already at -i.
@@ -130,10 +126,11 @@ self.derivative_at_inf = -2*i*self.derivative_at_inf;
 % Now rotate vertices so that the derivative is +real.
 ang = angle(self.derivative_at_inf);
 rotation = exp(i*(pi + ang));
-disp(pi + ang)
+%disp(pi + ang)
 
 % finite difference approximation
 ang2 = angle(diff(z(end-4:end-3)));
+disp(ang2)
 rotation = exp(i*-ang2);
 %disp(ang2)
 
@@ -165,12 +162,12 @@ self.exterior_disc_vertices = z(1:self.N);
 
 % Now unfortunately we want to make 0 match up with 0, so we have to figure out
 % where on the interior this ends up.
-temp = [linspace(6.2, 2*pi, 2) linspace(0, 0.1, 2)];
+temp = [6.2 linspace(0, 0.1, 2)];
 ext0_on_int = self.interpolate([], temp);
 % Why the F*** do I have to do the above with more than one point!?!?
 
 % Rotate interior with this much
-rotation = exp(-i*ext0_on_int(3));
+rotation = exp(-i*ext0_on_int(2));
 
 self.moebius_maps.interior_rotation = MoebiusMap([rotation 0; 0 1]);
 

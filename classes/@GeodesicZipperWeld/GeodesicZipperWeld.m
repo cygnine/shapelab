@@ -44,7 +44,7 @@ classdef GeodesicZipperWeld < ZipperWeld
         return;
       end
 
-      fd_at_inf = [1e4 1e4+1].';
+      fd_at_inf = [1e6+2 1e6+3].';
 
       self.z = z;
 

@@ -18,8 +18,8 @@ self.derivative_at_inf = i/2*(self.z(2) - self.z(1));
 
 % Let's just see if we can get *most* of the map derivatives computed, modulo
 % the maps to/from infinity
-z(end-4) = i;
-z(end-3) = i + 1e-4;
+%z(end-4) = i;
+%z(end-3) = i + 1e-4;
 self.derivative_at_inf = 1;
 
 % Ok, we're actually going to find the derivative of the map M \circ \Psi \circ
